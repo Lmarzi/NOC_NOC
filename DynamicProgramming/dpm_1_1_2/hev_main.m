@@ -8,30 +8,35 @@ load ARTEMIS_road.mat
 load WLTC.mat
 
 %Choose the driving cycle 
-drive_cycle = ARTEMIS_road;
+drive_cycle = ARTEMIS;
 N=length(drive_cycle(1,:));
-speed_vector=drive_cycle(1,1:N);
+speed_vector=drive_cycle(1,1:N)+3/3.6*ones(1,N);
 acceleration_vector=drive_cycle(2,1:N);
 gearnumber_vector=drive_cycle(3,1:N);
 SOC_sup = 0.7;
 SOC_inf = 0.4;
 SOC_cons = 0.55;
+Path = 0.01;
 % create grid
 clear grd
-grd.Nx{1}    = 55; 
+Nx = floor((SOC_sup-SOC_inf)/Path+1);
+grd.Nx{1}    = Nx; 
 grd.Xn{1}.hi = SOC_sup; 
 grd.Xn{1}.lo = SOC_inf;
-
-grd.Nu{1}    = 25; 
-grd.Un{1}.hi = 1; 
-grd.Un{1}.lo = -1;	% Att: Lower bound may vary with engine size.
-
 % set initial condition on the state
 grd.X0{1} = SOC_cons;
 
 % final state constraints
 grd.XN{1}.hi = SOC_cons+0.01;
 grd.XN{1}.lo = SOC_cons;
+
+Inp_max = 1;
+Inp_min = -5;
+Nu = floor((Inp_max-Inp_min)/0.01+1);
+%Input 
+grd.Nu{1}    = Nu; 
+grd.Un{1}.hi = Inp_max; 
+grd.Un{1}.lo = Inp_min;	% Att: Lower bound may vary with engine size.
 
 % define problem
 clear prb
@@ -41,10 +46,11 @@ prb.W{2} = acceleration_vector;
 prb.W{3} = gearnumber_vector; 
 %Sampling time definition for discretization
 prb.Ts = 1;
-prb.N  = (N-1)*1/prb.Ts + 1;
+prb.N  = N/prb.Ts;
 
 % set options
 options = dpm();
+options.SaveMap=1;
 options.MyInf = 1000;
 options.BoundaryMethod = 'Line'; % also possible: 'none' or 'LevelSet';
 if strcmp(options.BoundaryMethod,'Line') 
@@ -71,8 +77,11 @@ ylim([SOC_inf SOC_sup])
 xlim([0 N])
 
 %Plot control variable
-U0_extr = dyn.Uo(:,:);
-U0 = cell2mat(U0_extr);
+U0_extr = dyn.B.lo.Uo{1};
+U0 = U0_extr(1,1:N);
+%U02 = U0_extr2(1,1:N);
+%U03_extr = dyn.Uo{1,:};
+
 t2 = 0:1:N-1;
 xpl = linspace(0,N,N);
 ypl = zeros(size(xpl));
@@ -90,31 +99,35 @@ grid on
 xlabel("Time[s]")
 ylabel("U0")
 xlim([0 N])
-ylim([-2,2])
+ylim([-5,2])
 title("Torque Split Ratio")
 legend("Regenerative Braking","Mix","U0")
 subplot(2,1,2)
 plot(t2,speed_vector*3.6)
 xlabel("Time[s]")
 ylabel("Speed [Km/h]")
-title("Driving cycle:")
+title("Driving cycle")
 
 %Plot fuel consumption
-C_extr = res.Pe(1,:);
-cons =zeros(1,N);
-for i=1:N-1
- cons(i+1) = cons(i)+C_extr(i);
-end
 C_extr2 = res.Pe2(1,:);
 cons2 =zeros(1,N);
 for i=1:N-1
  cons2(i+1) = cons2(i)+C_extr2(i);
 end
+C = res.C{1};
+total = zeros(1,N);
+for i=1:N-1
+    total(i+1)=total(i)+C(i);
+end
+
 figure
-plot(t2,(cons2*N/43400000));
+plot(t2,(cons2*N/(43.308*10^6)));
 hold on
-plot(t2,(cons*N/43400000));
+plot(t2,total*N)
 legend("Consumption ICE Only","Consumption ICE+EM")
+xlabel("Time[s]")
+ylabel("Fuel consumption [g]")
 title("Consumption comparison")
+
 
 
