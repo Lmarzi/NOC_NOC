@@ -10,7 +10,7 @@ load WLTC.mat
 %Choose the driving cycle 
 drive_cycle = ARTEMIS;
 N=length(drive_cycle(1,:));
-speed_vector=drive_cycle(1,1:N)+3/3.6*ones(1,N);
+speed_vector=drive_cycle(1,1:N);
 acceleration_vector=drive_cycle(2,1:N);
 gearnumber_vector=drive_cycle(3,1:N);
 SOC_sup = 0.7;
@@ -31,7 +31,7 @@ grd.XN{1}.hi = SOC_cons+0.01;
 grd.XN{1}.lo = SOC_cons;
 
 Inp_max = 1;
-Inp_min = -5;
+Inp_min = -1;
 Nu = floor((Inp_max-Inp_min)/0.01+1);
 %Input 
 grd.Nu{1}    = Nu; 
