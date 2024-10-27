@@ -75,7 +75,7 @@ gasoline_lower_heating_value = 43.308*10^6; %J/kg
 %   
 % engine internal efficiency
 eta  = [
-0                   0.07                   0.08                   0.09                     0.09              0.1            0.1                   0.11                   0.11              0.11                  0.11                  0.11               0.11              0.11                0.11                 0.11                0.10                0.1                0.09                  0.09                0.08
+0                  0.07                0.08                   0.09                     0.09              0.1            0.1                   0.11                   0.11              0.11                  0.11                  0.11               0.11              0.11                0.11                 0.11                0.10                0.1                0.09                  0.09                0.08
 0.0712000000000000	0.0819399790831982	0.0872833659579903	0.0934870250618059	0.0996083482572143	0.104662319099298	0.108294376957084	0.110435790791019	0.111395756098731	0.111706254626048	0.111783116678594	0.111835411813953	0.111893055301263	0.111961343195404	0.111980233096452	0.111570784583218	0.108792601925399	0.103472285985269	0.0972247971502893	0.0910256470792751	0.0853701011082966
 0.132500000000000	0.145393763493630	0.155155156586610	0.165810810549683	0.176322601988724	0.184421168271825	0.188902556189124	0.190408719740783	0.190374008606551	0.189664720300343	0.188839570415178	0.188008263687098	0.187297096420401	0.186528489234596	0.184135528114002	0.180616006241626	0.171107624687906	0.159004232768166	0.146826088726952	0.135612075882292	0.125776505240612
 0.185200000000000	0.194060846422817	0.207410406583586	0.221602632214219	0.235474705100449	0.246153736589742	0.249501409988707	0.248862102656193	0.247875702156245	0.246374158192340	0.244817907025220	0.242850181376088	0.241545846698982	0.239942090351005	0.235109126732724	0.228326020975746	0.210865152962617	0.193071911864631	0.176452812336487	0.161756163195793	0.149140880964793
@@ -102,7 +102,7 @@ eta  = [
 % Maximum engine torque
 Tmax = [0 50 80 153.012 153.012 153.012 153.012 153.012 153.012 153.012 153.012 153.012 153.012 153.012 153.012 153.012 153.012 153.012 153.012 150.15 128.6901];
 % Engine efficiency (function of speed)
-e_th = (wg~=0) .*interp2(we_list,Te0_list,eta,wg.*ones(size(Te)),Te)+0.067598*(wg==0);
+e_th = (wg~=0) .*interp2(we_list,Te0_list,eta,wg.*ones(size(Te)),Te)+0.067598.*(Te==0);
 % Fuel mass flow (function of power and efficiency)
 m_dot_fuel = Te.*wg./e_th./gasoline_lower_heating_value;
 %CASE 2_ONLY ICE
@@ -210,29 +210,19 @@ e(isnan(e)) = 1;
 % Calculate electric power consumption
 Pm =  (Tm<0) .* wg.*Tm.*e + (Tm>=0) .* wg.*Tm./e;
 
-% BATTERY
+% BATTERY SIMPLIFIED MODEL-Only a constant voltage generator
 % state-of-charge list
 soc_list = [0 0.2 0.4 0.6 0.8 1];
 % Discharging resistance (indexed by state-of-charge list)
-%IF YOU WANT TO CONSIDER IT IN THE MODEL UNCOMMENT THIS LINE BELOW
-    %R_dis    = [1.75    0.60    0.40    0.30    0.30    0.30]; % ohm
 R_dis    = [0 0 0 0 0 0]; % ohm
 % Charging resistance (indexed by state-of-charge list)
-%IF YOU WANT TO CONSIDER IT IN THE MODEL UNCOMMENT THIS LINE BELOW
-    %R_chg    = [0.35    0.50    0.85    1.00    2.00    5.00]; % ohm
 R_chg    = [0 0 0 0 0 0]; % ohm
 % open circuit voltage (indexed by state-of-charge list)
-%IF WE WANT TO USE VARIABLE V_oc BASED ON STATE OF CHARGE UNCOMMENT THE
-%LINE BELOW
-    %V_oc     = [95     100     105     110     110     114]; %Volt
 V_oc     = [100     100     100     100     100     100]; % volt
 
 % Battery efficiency
 % columbic efficiency (0.9 when charging)
 e = (Pm>0) + (Pm<=0) .* 0.9;
-% Battery internal resistance
-r = (Pm>0)  .* interp1(soc_list, R_dis, inp.X{1},'linear','extrap')...
-  + (Pm<=0) .* interp1(soc_list, R_chg, inp.X{1},'linear','extrap');
 
 % Battery current limitations
 battery_capacity = 45; %Ah 
@@ -242,9 +232,10 @@ im = (Pm>0) .* max_disch_curr + (Pm<=0) .* max_char_curr;
 % Battery voltage
 v = interp1(soc_list, V_oc, inp.X{1},'linear','extrap');
 % Battery current
+r = 39e-3;
 Ib  =   e .* (v-sqrt(v.^2 - 4.*r.*Pm))./(2.*r);
-% New battery state of charge simplified!
-X{1}  = -1/(battery_capacity*3600)*Pm/100+inp.X{1}; %- Ib / (battery_capacity * 3600) + inp.X{1};
+% New battery state of charge simplified
+X{1}  = -1/(battery_capacity*3600)*Pm./v+inp.X{1}; % -Ib / (battery_capacity * 3600) + inp.X{1};
 % Battery power consumption
 Pb =   Ib .* v;
 % Update infeasible 
@@ -262,8 +253,6 @@ C{1}  = (Pe ./ gasoline_lower_heating_value);
 
 % SIGNALS
 %   store relevant signals in out
-out.fuel = m_dot_fuel;
-out.engineeff = e_th;
 out.Te = Te;
 out.Tm = Tm;
 out.Tb = Tb;
@@ -273,7 +262,7 @@ out.Pb = Pb;
 out.Tema = Te_max;
 out.Pe = Pe;
 out.Pe2= Pe2;
-out.PS= Tm./Ttot*r_gear(inp.W{3} + (inp.W{3}==0));
+out.PS= Tm./Ttot;
 % REVISION HISTORY
 % =========================================================================
 % DATE      WHO                 WHAT
