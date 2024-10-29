@@ -13,12 +13,16 @@ N=length(drive_cycle(1,:));
 speed_vector=drive_cycle(1,1:N);
 acceleration_vector=drive_cycle(2,1:N);
 gearnumber_vector=drive_cycle(3,1:N);
+%Driving cycles are defined without any slope
+%If you want to define a slope, change the vector below 
+road_slope = zeros(1,N); %rad
+%SOC constraints
 SOC_sup = 0.7;
 SOC_inf = 0.4;
 SOC_cons = 0.55;
-Path = 0.01;
 % create grid
 clear grd
+Path = 0.01;
 Nx = floor((SOC_sup-SOC_inf)/Path+1);
 grd.Nx{1}    = Nx; 
 grd.Xn{1}.hi = SOC_sup; 
@@ -44,6 +48,7 @@ clear prb
 prb.W{1} = speed_vector;
 prb.W{2} = acceleration_vector; 
 prb.W{3} = gearnumber_vector; 
+prb.W{4}=  road_slope;
 %Sampling time definition for discretization
 prb.Ts = 1;
 prb.N  = N/prb.Ts;
@@ -79,14 +84,13 @@ xlim([0 N])
 %Plot control variable
 U0_extr = dyn.B.lo.Uo{1};
 U0 = U0_extr(1,1:N);
-%U02 = U0_extr2(1,1:N);
-%U03_extr = dyn.Uo{1,:};
+Tsplit = res.PS(:);
 
 t2 = 0:1:N-1;
 xpl = linspace(0,N,N);
 ypl = zeros(size(xpl));
 x_fill = [xpl, fliplr(xpl)]; % combina x con la sua versione invertita per chiudere la forma
-y_fill = -[ypl, 1*ones(size(ypl))];
+y_fill = -[ypl, 5*ones(size(ypl))];
 y_fill2 = [ypl, 1*ones(size(ypl))];
 figure
 subplot(2,1,1)
@@ -94,14 +98,14 @@ f=fill(x_fill, y_fill,"green","FaceAlpha",0.4);
 hold on
 fill(x_fill, y_fill2, "red","FaceAlpha",0.4);
 hold on
-plot(t2,U0(1,:),"k","LineWidth",1)
+plot(t2,Tsplit,"k","LineWidth",1)
 grid on
 xlabel("Time[s]")
-ylabel("U0")
+ylabel("Torque split factor")
 xlim([0 N])
 ylim([-5,2])
 title("Torque Split Ratio")
-legend("Regenerative Braking","Mix","U0")
+legend("Regenerative Braking","Battery Discharge","U0")
 subplot(2,1,2)
 plot(t2,speed_vector*3.6)
 xlabel("Time[s]")
@@ -124,10 +128,32 @@ figure
 plot(t2,(cons2*N/(43.308*10^6)));
 hold on
 plot(t2,total*N)
-legend("Consumption ICE Only","Consumption ICE+EM")
+hold on
+saved_fuel = [total(1,N)*N cons2(1,N)*N/(43.308*10^6)];
+final_t = [t2(N) t2(N)];
+line(final_t,saved_fuel,"LineWidth",1.5)
+legend("Consumption ICE Only","Consumption ICE+EM","Saved Fuel")
 xlabel("Time[s]")
 ylabel("Fuel consumption [g]")
 title("Consumption comparison")
+Fuel_Saved = 100-(total(1,N))/(cons2(1,N))*(43.308*10^6)*100;
+fprintf('Fuel saved %4.2f%% \n',Fuel_Saved)
+%% COMPUTE OPTIMAL COST SEQUENCE!!
+ind = zeros(N);
+for i=1:N
+    J0_curr = dyn.Jo{1,i};
+    [M,I] = min(J0_curr);
+    ind(i)=I(1);
+end
 
-
-
+U0_opt = zeros(1,N);
+for i=1:N
+    U0_extract=dyn.Uo{1,i};
+    pos = ind(i);
+    U0_opt(i)=U0_extract(pos);
+end
+figure
+plot(t2,U0_opt)
+hold on
+plot(t2,U0)
+legend("U0 con J0","U0 con J0.b.lo")
