@@ -82,9 +82,21 @@ ylim([SOC_inf SOC_sup])
 xlim([0 N])
 
 %Plot control variable
-U0_extr = dyn.B.lo.Uo{1};
-U0 = U0_extr(1,1:N);
 Tsplit = res.PS(:);
+
+ind = zeros(N);
+for i=1:N
+    J0_curr = dyn.Jo{1,i};
+    [M,I] = min(J0_curr);
+    ind(i)=I(1);
+end
+
+U0_opt = zeros(1,N);
+for i=1:N
+    U0_extract=dyn.Uo{1,i};
+    pos = ind(i);
+    U0_opt(i)=U0_extract(pos);
+end
 
 t2 = 0:1:N-1;
 xpl = linspace(0,N,N);
@@ -93,24 +105,34 @@ x_fill = [xpl, fliplr(xpl)]; % combina x con la sua versione invertita per chiud
 y_fill = -[ypl, 5*ones(size(ypl))];
 y_fill2 = [ypl, 1*ones(size(ypl))];
 figure
-subplot(2,1,1)
+subplot(3,1,1)
 f=fill(x_fill, y_fill,"green","FaceAlpha",0.4);
 hold on
 fill(x_fill, y_fill2, "red","FaceAlpha",0.4);
 hold on
-plot(t2,Tsplit,"k","LineWidth",1)
+plot(t2,U0_opt,"k","LineWidth",1)
 grid on
 xlabel("Time[s]")
 ylabel("Torque split factor")
 xlim([0 N])
-ylim([-5,2])
+ylim([-2,2])
 title("Torque Split Ratio")
-legend("Regenerative Braking","Battery Discharge","U0")
-subplot(2,1,2)
+legend("Battery charge","Battery Discharge","U0")
+subplot(3,1,2)
 plot(t2,speed_vector*3.6)
 xlabel("Time[s]")
 ylabel("Speed [Km/h]")
 title("Driving cycle")
+subplot(3,1,3)
+plot(t,SOC)
+hold on
+plot(t,SOC_cons*ones(N+1),"--k")
+title("SOC")
+xlabel("Time[s]")
+ylabel("SOC")
+grid on
+ylim([SOC_inf SOC_sup])
+xlim([0 N])
 
 %Plot fuel consumption
 C_extr2 = res.Pe2(1,:);
@@ -138,22 +160,8 @@ ylabel("Fuel consumption [g]")
 title("Consumption comparison")
 Fuel_Saved = 100-(total(1,N))/(cons2(1,N))*(43.308*10^6)*100;
 fprintf('Fuel saved %4.2f%% \n',Fuel_Saved)
-%% COMPUTE OPTIMAL COST SEQUENCE!!
-ind = zeros(N);
+%%
+U0_grid = zeros(Nx,N);
 for i=1:N
-    J0_curr = dyn.Jo{1,i};
-    [M,I] = min(J0_curr);
-    ind(i)=I(1);
+    U0_grid(:,i) = dyn.Uo{1,i};
 end
-
-U0_opt = zeros(1,N);
-for i=1:N
-    U0_extract=dyn.Uo{1,i};
-    pos = ind(i);
-    U0_opt(i)=U0_extract(pos);
-end
-figure
-plot(t2,U0_opt)
-hold on
-plot(t2,U0)
-legend("U0 con J0","U0 con J0.b.lo")
