@@ -82,22 +82,6 @@ ylim([SOC_inf SOC_sup])
 xlim([0 N])
 
 %Plot control variable
-Tsplit = res.PS(:);
-
-ind = zeros(N);
-for i=1:N
-    J0_curr = dyn.Jo{1,i};
-    [M,I] = min(J0_curr);
-    ind(i)=I(1);
-end
-
-U0_opt = zeros(1,N);
-for i=1:N
-    U0_extract=dyn.Uo{1,i};
-    pos = ind(i);
-    U0_opt(i)=U0_extract(pos);
-end
-
 t2 = 0:1:N-1;
 xpl = linspace(0,N,N);
 ypl = zeros(size(xpl));
@@ -110,7 +94,7 @@ f=fill(x_fill, y_fill,"green","FaceAlpha",0.4);
 hold on
 fill(x_fill, y_fill2, "red","FaceAlpha",0.4);
 hold on
-plot(t2,U0_opt,"k","LineWidth",1)
+plot(t2,res.u,"k","LineWidth",1)
 grid on
 xlabel("Time[s]")
 ylabel("Torque split factor")
@@ -160,8 +144,3 @@ ylabel("Fuel consumption [g]")
 title("Consumption comparison")
 Fuel_Saved = 100-(total(1,N))/(cons2(1,N))*(43.308*10^6)*100;
 fprintf('Fuel saved %4.2f%% \n',Fuel_Saved)
-%%
-U0_grid = zeros(Nx,N);
-for i=1:N
-    U0_grid(:,i) = dyn.Uo{1,i};
-end
