@@ -67,7 +67,7 @@ fuel.lambda_MKpkg = 43.308;
 battery.capacity_kWh = 4.5; 
 %%
 % Creare una griglia di velocità e coppia ICE
-[Vel, Copp] = meshgrid(engine.fuel_map_speed_radps*60,engine.fuel_map_torque_Nm);
+[Vel, Copp] = meshgrid(engine.fuel_map_speed_radps*(60/(2*pi)),engine.fuel_map_torque_Nm);
 
 figure;
 vect_eff=[0.05,0.15,0.20,0.25,0.29,0.33,0.35,0.37];
@@ -77,33 +77,53 @@ xlabel('Speed [rpm]');
 ylabel('Torque [Nm]');
 title('Efficiency Contour Map');
 hold on;
-plot(engine.full_throttle_speed_radps*60,engine.full_throttle_torque_Nm)
+plot(engine.full_throttle_speed_radps*(60/(2*pi)),engine.full_throttle_torque_Nm)
+xlim([500,6000])
+ylim([0,200])
 %% Creare una griglia di velocità e coppia EM
-[torque_grid, speed_grid]=meshgrid(motor.battery_power_map_torque_Nm,motor.battery_power_map_speed_radps*60);
+[torque_grid, speed_grid]=meshgrid(motor.battery_power_map_torque_Nm,motor.battery_power_map_speed_radps.*(60/(2*pi)));
 figure
-contourf(speed_grid*60, torque_grid,motor.battery_power_map_W, 'ShowText', 'on'); % Con testo dei livelli
+contourf(speed_grid, torque_grid,motor.battery_power_map_W, 'ShowText', 'on'); % Con testo dei livelli
 colorbar; % Barra dei colori per rappresentare i valori di efficienza
 xlabel('Speed [rpm]');
 ylabel('Torque [Nm]');
-title('Efficiency Contour Map');
+title('Power Contour Map');
 
-mech_power_map = speed_grid/60.*torque_grid;
-efficiency_map = mech_power_map./motor.battery_power_map_W;
-flop= fliplr(efficiency_map(:,floor(length(motor.battery_power_map_torque_Nm)/2)+1:end));
-eff = [flop];
-eff = [eff (efficiency_map(:,ceil(length(motor.battery_power_map_torque_Nm)/2)+1:end))];
-torques = linspace(0,250,51);
-
-% Creare una griglia di velocità e coppia EM
-[torque_2,speed_2]=meshgrid(motor.battery_power_map_torque_Nm, motor.max_torque_speed_radps*60);
+mech_power_map = torque_grid.*speed_grid.*((2*pi)/60);
+efficiency_map = motor.battery_power_map_W./mech_power_map;
+corr_eff = efficiency_map(:,1:25);
+corr_eff(:,26)=ones(73,1);
+test = corr_eff;
+for i = 27:51
+    j = 52-i;
+    corr_eff(:,i)=efficiency_map(:,j);
+end
+test2 = corr_eff(:,26:end);
+[torque_2,speed_2]=meshgrid(motor.battery_power_map_torque_Nm, motor.battery_power_map_speed_radps.*(60/(2*pi)));
 figure;
 livelli_eff = [0.81,0.85,0.88,0.91,0.93,0.94];
-contour(speed_2*60,torque_2,eff,livelli_eff, 'ShowText', 'on'); % Con testo dei livelli
+contour(speed_2,torque_2,corr_eff,livelli_eff, 'ShowText', 'on'); % Con testo dei livelli
 xlabel('Speed [rpm]');
 ylabel('Torque [Nm]');
 title('Efficiency Contour Map');
 hold on
-plot(speed_2*60,motor.max_torque_torque_Nm,"k","LineWidth",2);
+plot(speed_2,motor.max_torque_torque_Nm,"k","LineWidth",2);
 hold on
-plot(speed_2*60,motor.min_torque_torque_Nm,"k","LineWidth",2);
-ylim([-50 100])
+plot(speed_2,motor.min_torque_torque_Nm,"k","LineWidth",2);
+ylim([-70 120])
+xlim([0 6000])
+
+
+[torque_2,speed_2]=meshgrid(motor.battery_power_map_torque_Nm(:,26:end), motor.battery_power_map_speed_radps.*(60/(2*pi)));
+figure;
+livelli_eff = [0.81,0.85,0.88,0.91,0.93,0.94];
+contour(speed_2,torque_2,test2,livelli_eff, 'ShowText', 'on'); % Con testo dei livelli
+xlabel('Speed [rpm]');
+ylabel('Torque [Nm]');
+title('Efficiency Contour Map');
+hold on
+plot(speed_2,motor.max_torque_torque_Nm,"k","LineWidth",2);
+hold on
+plot(speed_2,motor.min_torque_torque_Nm,"k","LineWidth",2);
+ylim([-70 120])
+xlim([0 6000])
