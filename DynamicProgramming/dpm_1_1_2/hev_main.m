@@ -3,9 +3,9 @@ close all
 clear all
 
 % load driving cycle
-load Artemis.mat
-load ARTEMIS_road.mat
-load WLTC.mat
+load ARTEMIS.mat
+%load ARTEMIS_road.mat
+%load WLTC.mat
 
 %Choose the driving cycle 
 drive_cycle = ARTEMIS;
@@ -32,10 +32,10 @@ grd.X0{1} = SOC_cons;
 
 % final state constraints
 grd.XN{1}.hi = SOC_cons+0.01;
-grd.XN{1}.lo = SOC_cons;
+grd.XN{1}.lo = SOC_cons-0.01;
 
 Inp_max = 1;
-Inp_min = -1;
+Inp_min = -5;
 Nu = floor((Inp_max-Inp_min)/0.01+1);
 %Input 
 grd.Nu{1}    = Nu; 
@@ -99,7 +99,7 @@ grid on
 xlabel("Time[s]")
 ylabel("Torque split factor")
 xlim([0 N])
-ylim([-2,2])
+ylim([-5,2])
 title("Torque Split Ratio")
 legend("Battery charge","Battery Discharge","U0")
 subplot(3,1,2)
@@ -129,7 +129,7 @@ total = zeros(1,N);
 for i=1:N-1
     total(i+1)=total(i)+C(i);
 end
-
+%%
 figure
 plot(t2,(cons2*N/(43.308*10^6)));
 hold on
@@ -144,3 +144,7 @@ ylabel("Fuel consumption [g]")
 title("Consumption comparison")
 Fuel_Saved = 100-(total(1,N))/(cons2(1,N))*(43.308*10^6)*100;
 fprintf('Fuel saved %4.2f%% \n',Fuel_Saved)
+
+%%
+figure
+plot(res.UU)
