@@ -263,6 +263,7 @@ out.Tema = Te_max;
 out.Pe = Pe;
 out.Pe2= Pe2;
 out.PS= Tm./abs(Ttot);
+out.Tb=Tb;
 % REVISION HISTORY
 % =========================================================================
 % DATE      WHO                 WHAT
