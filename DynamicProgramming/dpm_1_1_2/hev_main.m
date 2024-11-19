@@ -9,6 +9,7 @@ load ARTEMIS.mat
 
 %Choose the driving cycle 
 drive_cycle = ARTEMIS;
+<<<<<<< HEAD
 N=length(drive_cycle(1,:));
 speed_vector=drive_cycle(1,1:N);
 acceleration_vector=drive_cycle(2,1:N);
@@ -20,6 +21,13 @@ for i=1:N
     end
 end
 
+=======
+N=100;%length(drive_cycle(1,:));
+start=100;
+speed_vector=drive_cycle(1,start:(start+N));
+acceleration_vector=drive_cycle(2,start:start+N);
+gearnumber_vector=drive_cycle(3,start:start+N);
+>>>>>>> 8fea7023a6552caad4cb7243935e3b65bb04a630
 %Driving cycles are defined without any slope
 %If you want to define a slope, change the vector below 
 road_slope = zeros(1,N); %rad
@@ -100,8 +108,7 @@ subplot(3,1,1)
 f=fill(x_fill, y_fill,"green","FaceAlpha",0.4);
 hold on
 fill(x_fill, y_fill2, "red","FaceAlpha",0.4);
-hold on
-plot(t2,res.u,"k","LineWidth",1)
+hold on 
 grid on
 xlabel("Time[s]")
 ylabel("Torque split factor")
@@ -110,12 +117,12 @@ ylim([-5,2])
 title("Torque Split Ratio")
 legend("Battery charge","Battery Discharge","U0")
 subplot(3,1,2)
-plot(t2,speed_vector*3.6)
+stairs(t2,speed_vector*3.6)
 xlabel("Time[s]")
 ylabel("Speed [Km/h]")
 title("Driving cycle")
 subplot(3,1,3)
-plot(t,SOC)
+stairs(t,SOC)
 hold on
 plot(t,SOC_cons*ones(N+1),"--k")
 title("SOC")
