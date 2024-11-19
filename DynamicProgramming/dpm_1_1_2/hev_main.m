@@ -1,6 +1,6 @@
 clc
 close all
-clear all
+%clear all
 
 % load driving cycle
 load ARTEMIS.mat
@@ -13,6 +13,13 @@ N=length(drive_cycle(1,:));
 speed_vector=drive_cycle(1,1:N);
 acceleration_vector=drive_cycle(2,1:N);
 gearnumber_vector=drive_cycle(3,1:N);
+
+for i=1:N
+    if(speed_vector(i)<=5/3.6)
+        speed_vector(i)=5/3.6;
+    end
+end
+
 %Driving cycles are defined without any slope
 %If you want to define a slope, change the vector below 
 road_slope = zeros(1,N); %rad
@@ -32,7 +39,7 @@ grd.X0{1} = SOC_cons;
 
 % final state constraints
 grd.XN{1}.hi = SOC_cons+0.01;
-grd.XN{1}.lo = SOC_cons-0.01;
+grd.XN{1}.lo = SOC_cons-0.005;
 
 Inp_max = 1;
 Inp_min = -5;

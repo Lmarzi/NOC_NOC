@@ -24,10 +24,6 @@ b_cd = 2.5373490;  %N/(m/s))
 c_cd = 0.38382359; %N/(m/s)^2)
 g=9.81;
 
-if(inp.W{1}<5/3.6)
-    inp.W{1}=5/3.6;
-end
-
 
 % Wheel speed (rad/s)
 wv  = inp.W{1} ./ wheel_radius;
@@ -110,8 +106,8 @@ Tmax = [0 50 80 153.012 153.012 153.012 153.012 153.012 153.012 153.012 153.012 
 % Engine efficiency (function of speed)
 e_th = interp2(we_list,Te0_list,eta,wg.*ones(size(Te)),Te);
 e_th2 = interp2(we_list,Te0_list,eta,wg.*ones(size(Te2)),Te2);
-e_th(isnan(e_th)) = 0.5;
-e_th2(isnan(e_th2)) = 0.5;
+e_th(isnan(e_th)) = 0.28;
+e_th2(isnan(e_th2)) = 0.28;
 
 % Fuel mass flow (function of power and efficiency)
 m_dot_fuel = Te.*wg./e_th./gasoline_lower_heating_value;
@@ -262,7 +258,6 @@ out.UU= Tm./Tv;
 out.u = inp.U{1};
 out.etaeng = e_th;
 out.eta = e_th2;
-out.marce = r_gear(inp.W{3} + (inp.W{3}==0));
 out.nmarce=inp.W{3} + (inp.W{3}==0);
 % REVISION HISTORY
 % =========================================================================
