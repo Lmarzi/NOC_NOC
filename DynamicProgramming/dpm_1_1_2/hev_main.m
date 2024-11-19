@@ -9,11 +9,11 @@ load ARTEMIS.mat
 
 %Choose the driving cycle 
 drive_cycle = ARTEMIS;
-N=100;%length(drive_cycle(1,:));
-start=100;
-speed_vector=drive_cycle(1,start:(start+N));
-acceleration_vector=drive_cycle(2,start:start+N);
-gearnumber_vector=drive_cycle(3,start:start+N);
+N=length(drive_cycle(1,:));
+start=1;
+speed_vector=drive_cycle(1,start:N);
+acceleration_vector=drive_cycle(2,start:N);
+gearnumber_vector=drive_cycle(3,start:N);
 %Driving cycles are defined without any slope
 %If you want to define a slope, change the vector below 
 road_slope = zeros(1,N); %rad
@@ -96,6 +96,7 @@ hold on
 fill(x_fill, y_fill2, "red","FaceAlpha",0.4);
 hold on 
 grid on
+plot(res.u)
 xlabel("Time[s]")
 ylabel("Torque split factor")
 xlim([0 N])
