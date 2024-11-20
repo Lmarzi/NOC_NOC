@@ -1,6 +1,6 @@
 clc
 close all
-%clear all
+clear all
 
 % load driving cycle
 load ARTEMIS.mat
