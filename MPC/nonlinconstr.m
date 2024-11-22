@@ -1,7 +1,7 @@
 function [c,ceq] = nonlinconstr(u,SOC_0,StateUpdate)
-[mf_eq,I,SOC,mf,Te_max,Tm_min,Tm_max,Te,Tm]=full_horizon(u,SOC_0,StateUpdate);
+[~,SOC,Treq,Tgiv,~,I_c,V_c]=full_horizon(u,SOC_0,StateUpdate);
 
-c=[SOC-0.7;0.3-SOC;Te-Te_max;Tm-Tm_max;Tm_min-Tm];
-ceq=[];
+c=[SOC-0.7;0.4-SOC;I_c;V_c];
+ceq=Treq-Tgiv;
 
 end
