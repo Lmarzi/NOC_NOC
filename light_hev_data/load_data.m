@@ -101,7 +101,7 @@ end
 test2 = corr_eff(:,26:end);
 [torque_2,speed_2]=meshgrid(motor.battery_power_map_torque_Nm, motor.battery_power_map_speed_radps.*(60/(2*pi)));
 figure;
-livelli_eff = [0.81,0.85,0.88,0.91,0.93,0.94];
+livelli_eff = [0.85,0.88,0.91,0.93,0.94];
 contour(speed_2,torque_2,corr_eff,livelli_eff, 'ShowText', 'on'); % Con testo dei livelli
 xlabel('Speed [rpm]');
 ylabel('Torque [Nm]');
@@ -110,13 +110,13 @@ hold on
 plot(speed_2,motor.max_torque_torque_Nm,"k","LineWidth",2);
 hold on
 plot(speed_2,motor.min_torque_torque_Nm,"k","LineWidth",2);
-ylim([-70 120])
-xlim([0 6000])
+ylim([-50 100])
+xlim([600 4000])
 
 
 [torque_2,speed_2]=meshgrid(motor.battery_power_map_torque_Nm(:,26:end), motor.battery_power_map_speed_radps.*(60/(2*pi)));
 figure;
-livelli_eff = [0.81,0.85,0.88,0.91,0.93,0.94];
+livelli_eff = [0.85,0.88,0.91,0.94];
 contour(speed_2,torque_2,test2,livelli_eff, 'ShowText', 'on'); % Con testo dei livelli
 xlabel('Speed [rpm]');
 ylabel('Torque [Nm]');
