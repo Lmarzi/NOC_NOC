@@ -40,7 +40,7 @@ grd.X0{1} = SOC_cons;
 
 % final state constraints
 grd.XN{1}.hi = SOC_cons+0.01;
-grd.XN{1}.lo = SOC_cons-0.005;
+grd.XN{1}.lo = SOC_cons;
 
 Inp_max = 1;
 Inp_min = -5;
@@ -125,7 +125,7 @@ ylabel("SOC")
 grid on
 ylim([SOC_inf SOC_sup])
 xlim([0 N])
-
+%%
 %Plot fuel consumption
 C_extr2 = res.Pe2(1,:);
 cons2 =zeros(1,N);
@@ -137,20 +137,20 @@ total = zeros(1,N);
 for i=1:N-1
     total(i+1)=total(i)+C(i);
 end
-%%
+
 figure
-plot(t2,(cons2*N/(43.308*10^6)));
+plot(t2,(cons2*N));
 hold on
 plot(t2,total*N)
 hold on
-saved_fuel = [total(1,N)*N cons2(1,N)*N/(43.308*10^6)];
+saved_fuel = [total(1,N)*N cons2(1,N)*N];
 final_t = [t2(N) t2(N)];
 line(final_t,saved_fuel,"LineWidth",1.5)
 legend("Consumption ICE Only","Consumption ICE+EM","Saved Fuel")
 xlabel("Time[s]")
 ylabel("Fuel consumption [g]")
 title("Consumption comparison")
-Fuel_Saved = 100-(total(1,N))/(cons2(1,N))*(43.308*10^6)*100;
+Fuel_Saved = 100-(total(1,N))/(cons2(1,N))*100;
 fprintf('Fuel saved %4.2f%% \n',Fuel_Saved)
 
 %%
