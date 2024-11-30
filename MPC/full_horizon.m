@@ -1,7 +1,7 @@
 function [mf_eq,SOC,Treq,Tgive,mf,I_c,V_c,Tm]= full_horizon(u,SOC_0,StateUpdate)
     N=length(u);
-    SOC=zeros(1,N+1);
-    SOC(1)=SOC_0;
+    %SOC=zeros(1,N+1);
+    SOC=SOC_0;
     mf=zeros(1,N+1);
     mb=zeros(1,N+1);
     seq=zeros(1,N+1);
