@@ -66,7 +66,7 @@ Te  = max(min((wg>0) .* (Ttot>0)  .* (1-inp.U{1}).*Ttot,Te_max),0);
 Tb  = (wg>0) .* (Ttot<=0) .* (1-inp.U{1}).*Ttot;
 % Torque provided by electric motor
 Tm  = min(max((wg>0) .* inp.U{1} .* Ttot,Tm_min),Tm_max);
-
+Tm=Tm*(1-(Tm>=0 && Treq<=0));
 Tgiv=Te+Tb+Tm;
 
 %compute mf
