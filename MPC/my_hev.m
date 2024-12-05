@@ -100,7 +100,7 @@ max_disch_curr = 100;   %A
 max_char_curr    = 125; %A
 Im = (Pm>0) .* max_disch_curr + (Pm<=0) .* max_char_curr;
 I_c=(Pm>0).*(Im-Ib)./Im-(Pm<=0).*(Ib-Im)./Im;
-V_c=(-Vn.^2 + 4.*r.*Pm)./Vn^2;
+V_c=(Vn.^2 - 4.*r.*Pm)./Vn^2;
 
 Pb =   Ib .* Vn;
 mb=Pb./gasoline_lower_heating_value;
