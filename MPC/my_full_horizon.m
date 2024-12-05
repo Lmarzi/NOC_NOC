@@ -14,7 +14,7 @@ function toreturn= my_full_horizon(u,SOC_0,StateUpdate)
     end
 
     mf_eq=sum(mf+mb.*seq);
-    c=[-SOC(2:end)+0.7,SOC(2:end)-0.4,-I_c,-V_c];
+    c=[-SOC(2:end)+0.7,SOC(2:end)-0.4,I_c,-V_c];
     ceq=Treq-Tgive;
     toreturn=[mf_eq,ceq,c]';
 end

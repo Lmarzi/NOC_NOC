@@ -275,32 +275,34 @@ elseif strcmp(myoptions.Hessmethod,'BFGS')    % BFGS method
         % Compute new search direction
         [pk,~,~,~,LagMult]  =   quadprog(Hk,gradfxk,-gradhk',hxk,gradgk',-gxk,[],[],[],myoptions.QPoptions);
         
-        entrato=(isempty(LagMult));
-        while isempty(LagMult)
-            % Compute cost and constraints and their gradients
-            xk              =   rand(length(xk),1)-rand(length(xk),1);
-            Hk              =   1e-4*eye(n);
-            [Vk,gradVk]    	=   mygradient(fun,xk,myoptions.gradmethod,myoptions.graddx);
-            fxk            	=   Vk(1:end-(p+q),1);
-            gradfxk        	=   gradVk(:,1:end-(p+q));
-            if ~isempty(A)
-                gxk                 =   [A*xk-b;Vk(end-p-q+1:end-q,1)];
-                gradgk              =   [A',gradVk(:,end-p-q+1:end-q,1)];
-            else
-                gxk                 =   Vk(end-p-q+1:end-q,1);
-                gradgk              =   gradVk(:,end-p-q+1:end-q,1);
-            end
-            if ~isempty(C)
-                hxk                 =   [C*xk-d;Vk(end-q+1:end,1)];
-                gradhk              =   [C',gradVk(:,end-q+1:end,1)];
-            else
-                hxk                 =   Vk(end-q+1:end,1);
-                gradhk              =   gradVk(:,end-q+1:end,1);
-            end
-            [pk,~,~,~,LagMult]  =   quadprog(Hk,gradfxk,-gradhk',hxk,gradgk',-gxk,[],[],[],myoptions.QPoptions);
+        % entrato=(isempty(LagMult))
+        % while isempty(LagMult)
+        %     % Compute cost and constraints and their gradients
+        %     xk              =   rand(length(xk),1)-rand(length(xk),1);
+        %     Hk              =   1e-4*eye(n);
+        %     [Vk,gradVk]    	=   mygradient(fun,xk,myoptions.gradmethod,myoptions.graddx);
+        %     fxk            	=   Vk(1:end-(p+q),1);
+        %     gradfxk        	=   gradVk(:,1:end-(p+q));
+        %     if ~isempty(A)
+        %         gxk                 =   [A*xk-b;Vk(end-p-q+1:end-q,1)];
+        %         gradgk              =   [A',gradVk(:,end-p-q+1:end-q,1)];
+        %     else
+        %         gxk                 =   Vk(end-p-q+1:end-q,1);
+        %         gradgk              =   gradVk(:,end-p-q+1:end-q,1);
+        %     end
+        %     if ~isempty(C)
+        %         hxk                 =   [C*xk-d;Vk(end-q+1:end,1)];
+        %         gradhk              =   [C',gradVk(:,end-q+1:end,1)];
+        %     else
+        %         hxk                 =   Vk(end-q+1:end,1);
+        %         gradhk              =   gradVk(:,end-q+1:end,1);
+        %     end
+        %     [pk,~,~,~,LagMult]  =   quadprog(Hk,gradfxk,-gradhk',hxk,gradgk',-gxk,[],[],[],myoptions.QPoptions);
+        % end
+
+        if isempty(LagMult)
+            po = 1;
         end
-
-
         lambda_tilde        =   -LagMult.eqlin;
         mu_tilde            =   LagMult.ineqlin;
         delta_lambda        =   lambda_tilde-lambdak;
