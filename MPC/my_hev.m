@@ -72,7 +72,6 @@ Tgiv=Te+Tb+Tm;
 %compute mf
 gasoline_lower_heating_value = 43.308*10^6; %J/kg
 e_th = F2(wg.*ones(size(Te)),Te);
-e_th(isnan(e_th)) = 0.5;
 
 mf=Te.*wg./e_th./gasoline_lower_heating_value;
 
