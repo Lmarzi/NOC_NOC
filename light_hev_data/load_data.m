@@ -80,6 +80,7 @@ hold on;
 plot(engine.full_throttle_speed_radps*(60/(2*pi)),engine.full_throttle_torque_Nm)
 xlim([500,6000])
 ylim([0,200])
+
 %% Creare una griglia di velocità e coppia EM
 [torque_grid, speed_grid]=meshgrid(motor.battery_power_map_torque_Nm,motor.battery_power_map_speed_radps.*(60/(2*pi)));
 figure
@@ -127,3 +128,5 @@ hold on
 plot(speed_2,motor.min_torque_torque_Nm,"k","LineWidth",2);
 ylim([-70 120])
 xlim([0 6000])
+%%
+eth1 = interp2(motor.battery_power_map_torque_Nm(:,26:end), motor.battery_power_map_speed_radps,test2,0,156)
