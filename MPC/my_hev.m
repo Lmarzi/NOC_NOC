@@ -79,7 +79,7 @@ mf=Te.*wg./e_th./gasoline_lower_heating_value;
 % Calculate electric power consumption
 % motor efficiency map (indexed by speed list and torque list)
 
-e=F1(wg.*ones(size(Tm)),abs(Tm));
+e=F1(abs(Tm),wg.*ones(size(Tm)));
 e(isnan(e))=1;
 Pm =  (Tm<0) .* wg.*Tm.*e + (Tm>=0) .* wg.*Tm./e;
 
