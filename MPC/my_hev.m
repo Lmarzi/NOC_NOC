@@ -75,6 +75,10 @@ e_th = F2(wg.*ones(size(Te)),Te);
 
 mf=Te.*wg./e_th./gasoline_lower_heating_value;
 
+if isnan(mf)
+    stop=1;
+end
+
 %SOC update
 
 % Calculate electric power consumption

@@ -30,7 +30,7 @@ wv  = inp.W{1} ./ wheel_radius;
 % Wheel acceleration (rad/s^2)
 dwv = inp.W{2} ./ wheel_radius;
 % Vehicle torque request (Nm)
-Tv = (vehicle_mass*g*sin(inp.W{4})+0*a_cd*cos(inp.W{4})+b_cd.*inp.W{1}*cos(inp.W{4}) + c_cd.*inp.W{1}.^2 + vehicle_mass.*inp.W{2}) .* wheel_radius;
+Tv = (vehicle_mass*g*sin(inp.W{4})+a_cd*cos(inp.W{4})+b_cd.*inp.W{1}*cos(inp.W{4}) + c_cd.*inp.W{1}.^2 + vehicle_mass.*inp.W{2}) .* wheel_radius;
 
 % TRANSMISSION
 gearbox_efficiency = 0.96;

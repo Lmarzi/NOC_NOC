@@ -1,14 +1,14 @@
 clc
 close all
-%clear all
+clear all
 
 % load driving cycle
 load ARTEMIS.mat
-%load ARTEMIS_road.mat
-%load WLTC.mat
+load ARTEMIS_road.mat
+load WLTC.mat
 
 %Choose the driving cycle 
-drive_cycle =ARTEMIS;
+drive_cycle =ARTEMIS_road;
 
 N=length(drive_cycle(1,:));
 speed_vector=drive_cycle(1,1:N);
@@ -40,7 +40,7 @@ grd.X0{1} = SOC_cons;
 
 % final state constraints
 grd.XN{1}.hi = SOC_cons+0.01;
-grd.XN{1}.lo = SOC_cons;
+grd.XN{1}.lo = 0.51;
 
 Inp_max = 1;
 Inp_min = -5;
@@ -139,11 +139,11 @@ for i=1:N-1
 end
 
 figure
-plot(t2,(cons2*N));
+plot(t2,(cons2*1000));
 hold on
-plot(t2,total*N)
+plot(t2,total*1000)
 hold on
-saved_fuel = [total(1,N)*N cons2(1,N)*N];
+saved_fuel = [total(1,N)*1000 cons2(1,N)*1000];
 final_t = [t2(N) t2(N)];
 line(final_t,saved_fuel,"LineWidth",1.5)
 legend("Consumption ICE Only","Consumption ICE+EM","Saved Fuel")
