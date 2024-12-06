@@ -106,7 +106,7 @@ V_c=(Vn.^2 - 4.*r.*Pm)./Vn^2;
 
 Pb =   Ib .* Vn;
 mb=Pb./gasoline_lower_heating_value;
-seq = ((Tm>0).*1/(0.2757*0.8879)+(Tm<0).*0.8879/0.2757)*20*(-(2*(SOC_new-0.55)).^3+(2*(0.7-0.55)).^3);
+seq = ((Tm>0).*1/(0.2757*0.8879)+(Tm<0).*0.8879/0.2757)*25*(-(2*(SOC_new-0.55)).^3+(2*(0.7-0.55)).^3);
 out.Tmmax = Tm_max;
 out.Tmmin = Tm_min;
 out.Temax = Te_max;
