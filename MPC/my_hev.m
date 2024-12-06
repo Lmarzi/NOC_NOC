@@ -1,4 +1,4 @@
-function [mf,SOC_new,seq,Treq,Tgiv,mb,I_c,V_c,Tm] = my_hev(speed,acceleration,gear,cur_SOC,u,F1,F2)
+function [mf,SOC_new,seq,Treq,Tgiv,mb,I_c,V_c,out] = my_hev(speed,acceleration,gear,cur_SOC,u,F1,F2)
 
 % VEHICLE PARAMETERS
 wheel_radius = 0.281154; %m
@@ -60,10 +60,12 @@ Te_max = interp1(we_list,Tmax,wg,'linear','extrap');
 % Total required torque (Nm)
 Ttot = Tg;
 % Torque provided by engine
-Te  = max(min((Ttot>0)  .* (1-inp.U{1}).*Ttot,Te_max),0);
+%Te  = max(min(Ttot>0)  .* (1-inp.U{1}).*Ttot,Te_max),0);
+Te = (Ttot>0)  .* (1-inp.U{1}).*Ttot;
 Tb  = (Ttot<=0) .* (1-inp.U{1}).*Ttot;
 % Torque provided by electric motor
-Tm  = min(max(inp.U{1} .* Ttot,Tm_min),Tm_max);
+%Tm  = min(max(inp.U{1} .* Ttot,Tm_min),Tm_max);
+Tm = inp.U{1} .* Ttot;
 Tm=Tm*(1-(Tm>=0 && Treq<=0));
 Tgiv=Te+Tb+Tm;
 
@@ -105,6 +107,10 @@ V_c=(Vn.^2 - 4.*r.*Pm)./Vn^2;
 Pb =   Ib .* Vn;
 mb=Pb./gasoline_lower_heating_value;
 seq = ((Tm>0).*1/(0.2757*0.8879)+(Tm<0).*0.8879/0.2757)*20*(-(2*(SOC_new-0.55)).^3+(2*(0.7-0.55)).^3);
-
+out.Tmmax = Tm_max;
+out.Tmmin = Tm_min;
+out.Temax = Te_max;
+out.Te = Te;
+out.Tm = Tm;
 
 end
