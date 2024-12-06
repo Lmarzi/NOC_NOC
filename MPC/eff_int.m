@@ -106,6 +106,11 @@ F1 = griddedInterpolant(wm',tm',etam,'linear','none');
 
 [we,te]=meshgrid(we_list,Te0_list);
 F2 = griddedInterpolant(we',te',eta','linear','none');
+%%
+e_th = F1(140,100)
+
+
+%%
 
 save engeff eta we_list Te0_list etam wm_list Tm_list
 save eff_interpol F1 F2
