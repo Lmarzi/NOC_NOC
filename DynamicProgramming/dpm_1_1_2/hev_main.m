@@ -8,7 +8,7 @@ load ARTEMIS_road.mat
 load WLTC.mat
 
 %Choose the driving cycle 
-drive_cycle =ARTEMIS_road;
+drive_cycle =ARTEMIS;
 
 N=length(drive_cycle(1,:));
 speed_vector=drive_cycle(1,1:N);
@@ -40,7 +40,7 @@ grd.X0{1} = SOC_cons;
 
 % final state constraints
 grd.XN{1}.hi = SOC_cons+0.01;
-grd.XN{1}.lo = 0.51;
+grd.XN{1}.lo = SOC_cons;
 
 Inp_max = 1;
 Inp_min = -5;
@@ -152,7 +152,3 @@ ylabel("Fuel consumption [g]")
 title("Consumption comparison")
 Fuel_Saved = 100-(total(1,N))/(cons2(1,N))*100;
 fprintf('Fuel saved %4.2f%% \n',Fuel_Saved)
-
-%%
-figure
-plot(res.UU)
