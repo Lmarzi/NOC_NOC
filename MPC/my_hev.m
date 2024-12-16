@@ -60,13 +60,11 @@ Te_max = Temax_int(wg);
 % Total required torque (Nm)
 Ttot = Tg;
 % Torque provided by engine
-%Te  = max(min(Ttot>0)  .* (1-inp.U{1}).*Ttot,Te_max),0);
 Te = (Ttot>0).* (inp.U{1}<=1)  .* (1-inp.U{1}).*Ttot;
 Tb  = (Ttot<=0) .* (1-inp.U{1}).*Ttot;
 % Torque provided by electric motor
-%Tm  = min(max(inp.U{1} .* Ttot,Tm_min),Tm_max);
 Tm = inp.U{1} .* Ttot;
-Tm=Tm*(1-(Tm>=0 && Treq<=0));
+%Tm=Tm*(1-(Tm>=0 && Treq<=0));
 Tgiv=Te+Tb+Tm;
 
 %compute mf

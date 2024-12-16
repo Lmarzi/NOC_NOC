@@ -1,4 +1,4 @@
-function [mf_eq,SOC,Treq,Tgive,mf,I_c,V_c,Tm]= full_horizon(u,SOC_0,StateUpdate)
+function [mf_eq,SOC,Treqs,Tgiv,mf,I_c,V_c,Tm]= full_horizon(u,SOC_0,StateUpdate)
     N=length(u);
     %SOC=zeros(1,N+1);
     SOC=SOC_0;
@@ -16,8 +16,8 @@ function [mf_eq,SOC,Treq,Tgive,mf,I_c,V_c,Tm]= full_horizon(u,SOC_0,StateUpdate)
     %era così?
     mf_eq=sum(mf(2:end)+mb(2:end).*seq(2:end));
     SOC=SOC(2:end);
-    Treq=Treq(2:end);
-    Tgive=Tgive(2:end);
+    Treqs=Treq(2:end);
+    Tgiv=Tgive(2:end);
     I_c=I_c(2:end);
     V_c=V_c(2:end);
     Tm=Tm(2:end);
