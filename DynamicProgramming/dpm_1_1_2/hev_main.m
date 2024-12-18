@@ -8,7 +8,7 @@ load ARTEMIS_road.mat
 load WLTC.mat
 
 %Choose the driving cycle 
-drive_cycle =WLTC;
+drive_cycle =ARTEMIS;
 
 %extract the driving cycles
 N=length(drive_cycle(1,:));
@@ -41,7 +41,7 @@ grd.X0{1} = SOC_cons;
 
 % final state constraints
 grd.XN{1}.hi = SOC_cons+0.01;
-grd.XN{1}.lo = 0.5177;
+grd.XN{1}.lo = 0.5451;
 
 % Input characterization
 Inp_max = 1;
