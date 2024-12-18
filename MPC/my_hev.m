@@ -98,6 +98,8 @@ out.Tmmin = Tm_min;
 out.Temax = Te_max;
 out.Te = Te;
 out.Tm = Tm;
-out.Tmmax_cons = (-Tm+Tm_max)/Tm_max;
-out.Temax_cons = (Te_max>0)*(-Te+Te_max)/Te_max;
+
+out.Tmmin_cons = (Tm-Tm_min)./(Tm_max-Tm_min);
+out.Tmmax_cons = (-Tm+Tm_max)./Tm_max;
+out.Temax_cons = (Te_max>0)*(-Te+Te_max)./Te_max;
 end

@@ -16,7 +16,7 @@ function toreturn= my_full_horizon(u,SOC_0,StateUpdate)
     % Define the cost function, equality and inequality constraints to
     % return to myfmincon
     mf_eq=sum(mf+mb.*seq);
-    c=[-SOC(2:end)+0.7,SOC(2:end)-0.4,I_c,V_c,[out.Tm]-[out.Tmmin],[out.Tmmax_cons],[out.Temax_cons]];
+    c=[-SOC(2:end)+0.7,SOC(2:end)-0.4,I_c,V_c,[out.Tmmin_cons],[out.Tmmax_cons],[out.Temax_cons]];
     ceq=[];
     toreturn=[mf_eq,ceq,c]';
 end
