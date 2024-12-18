@@ -64,7 +64,6 @@ mf=Te.*wg./e_th./gasoline_lower_heating_value;
 
 %EM efficiency extraction
 e=F1(abs(Tm),wg.*ones(size(Tm)));
-e(isnan(e))=1;
 % Calculate electric motor power consumption
 Pm =  (Tm<0) .* wg.*Tm.*e + (Tm>=0) .* wg.*Tm./e;
 
@@ -99,8 +98,6 @@ out.Tmmin = Tm_min;
 out.Temax = Te_max;
 out.Te = Te;
 out.Tm = Tm;
-
-out.Tmmin_cons = -(Tm_min<0)*(Tm-Tm_min)/Tm_min;
-out.Tmmax_cons = (Tm_max>0)*(-Tm+Tm_max)/Tm_max;
+out.Tmmax_cons = (-Tm+Tm_max)/Tm_max;
 out.Temax_cons = (Te_max>0)*(-Te+Te_max)/Te_max;
 end
