@@ -1,4 +1,4 @@
-function [mf,SOC_new,seq,Treq,Tgiv,mb,I_c,V_c,out] = my_hev(speed,acceleration,gear,cur_SOC,u,F1,F2,Tmmax_int,Tmmin_int,Temax_int)
+function [mf,SOC_new,seq,Treq,Tgiv,mb,I_c,V_c,out] = my_hev(speed,acceleration,gear,dislivello,cur_SOC,u,F1,F2,Tmmax_int,Tmmin_int,Temax_int)
 
 % VEHICLE PARAMETERS
 wheel_radius = 0.281154; %m
@@ -17,7 +17,7 @@ speed=max(speed,5/3.6);
 inp.W{1}=speed;
 inp.W{2}=acceleration;
 inp.W{3}=gear;
-inp.W{4}=0;
+inp.W{4}=dislivello;
 inp.X{1}=cur_SOC;
 inp.U{1}=u;
 
