@@ -1,6 +1,6 @@
 close all
 clc
-clear all
+%clear all
 load ARTEMIS.mat;
 load ARTEMIS_road.mat
 load WLTC.mat
@@ -10,7 +10,7 @@ load eff_interpol.mat
 start=0;%Definisci l'istante iniziale
 N=5; %Time horizon ->compare sol with 5
 SOC_START=0.52;
-N_rounds=100;
+N_rounds=1;
 
 struct_eff=load("eff_interpol.mat");
 
@@ -26,7 +26,7 @@ u_n=1*ones(N,1);
 
 eltime = 0;
 tic
-x=zeros(N_rounds,1);
+%x=zeros(N_rounds,1);
 C=[eye(N);-eye(N)];
 d=[-ones(N,1);-ones(N,1)];
 
@@ -50,17 +50,16 @@ tot_acceleration=[];
 tot_gear=[];
 tot_dislivello=[];
 
-pos=1;
 m=1;
 u=[];
 exitf=[];
+SOC_tot=[];
 for k=1:N_rounds
     %Se si vuole cambiare ciclo tra un round e l'altro
     x(k)=rand;
     y(k)=rand;
     [driving_cycle,name]=pick_cycle(x(k),y(k));
-    fprintf("È stato scelto il ciclo %s, il SOC è %f",name, SOC(end))
-    fprintf("\n")
+    fprintf("È stato scelto il ciclo %s, il SOC è %f\n",name, SOC(end))
     tot_speed=[tot_speed,driving_cycle(1,1:end-N)];
     tot_acceleration=[tot_acceleration,driving_cycle(2,1:end-N)];
     tot_gear=[tot_gear,driving_cycle(3,1:end-N)];
@@ -77,8 +76,8 @@ for k=1:N_rounds
         dislivello=driving_cycle(4,start+j:start+N-1+j);
 
         StateUpdate=@(input,cur_SOC,i)my_hev(speed(i),acceleration(i),gear(i),dislivello(i),cur_SOC,input,etam_int,etaeng_int,Tmmax_int,Tmmin_int,Temax_int);
-        myFullStateUpdate=@(u)my_full_horizon(u,SOC(2),StateUpdate);
-        FullStateUpdate=@(u)full_horizon(u,SOC(2),StateUpdate);
+        myFullStateUpdate=@(u)my_full_horizon(u,SOC(1),StateUpdate);
+        FullStateUpdate=@(u)full_horizon(u,SOC(1),StateUpdate);
         
         %calcoli la u ottima sull'orizzonte dei 5 secondi
         [u_n,~,~,exitf_i,~,~]=myfmincon(myFullStateUpdate,[u_n(2:end);u_n(end)],[],[],C,d,0*N,8*N,myoptions);
@@ -89,7 +88,6 @@ for k=1:N_rounds
 
         %salvi la u per poi vedere il risultato complessivo
         u=[u,u_n(1)];
-        pos=pos+1;
         if exitf(j)<=0
             fprintf("All'iterazione %d l'exitflag è %d ",j,exitf(j))
         end
@@ -101,7 +99,6 @@ for k=1:N_rounds
             eltime = 0;
             tic
         end
-    
         [~,SOC]=FullStateUpdate(u_n);
     end
 end
@@ -114,10 +111,10 @@ tot_gear=[];
 tot_dislivello=[];
 for i=1:27
     driving_cycle=pick_cycle(x(i),y(i));
-    tot_speed=[tot_speed,driving_cycle(1,1:end-N-1)];
-    tot_acceleration=[tot_acceleration,driving_cycle(2,1:end-N-1)];
-    tot_gear=[tot_gear,driving_cycle(3,1:end-N-1)];
-    tot_dislivello=[tot_dislivello,driving_cycle(4,1:end-N-1)];
+    tot_speed=[tot_speed,driving_cycle(1,start+1:end-N-1)];
+    tot_acceleration=[tot_acceleration,driving_cycle(2,start+1:end-N-1)];
+    tot_gear=[tot_gear,driving_cycle(3,start+1:end-N-1)];
+    tot_dislivello=[tot_dislivello,driving_cycle(4,start+1:end-N-1)];
 end
 
 StateUpdate=@(input,cur_SOC,i)my_hev(tot_speed(i),tot_acceleration(i),tot_gear(i),tot_dislivello(i),cur_SOC,input,etam_int,etaeng_int,Tmmax_int,Tmmin_int,Temax_int);
