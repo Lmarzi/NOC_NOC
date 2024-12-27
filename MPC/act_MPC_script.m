@@ -56,8 +56,8 @@ exitf=[];
 SOC_tot=[];
 for k=1:N_rounds
     %Se si vuole cambiare ciclo tra un round e l'altro
-    x(k)=rand;
-    y(k)=rand;
+    %x(k)=rand;
+    %y(k)=rand;
     [driving_cycle,name]=pick_cycle(x(k),y(k));
     fprintf("È stato scelto il ciclo %s, il SOC è %f\n",name, SOC(end))
     tot_speed=[tot_speed,driving_cycle(1,1:end-N)];
