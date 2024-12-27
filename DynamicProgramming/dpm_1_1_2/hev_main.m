@@ -2,7 +2,7 @@ clc
 close all
 clear all
 
-% load driving cycles
+% load driving cycle
 load ARTEMIS.mat
 load ARTEMIS_road.mat
 load WLTC.mat
@@ -10,28 +10,27 @@ load WLTC.mat
 %Choose the driving cycle 
 drive_cycle =ARTEMIS;
 
-%extract the driving cycles
 N=length(drive_cycle(1,:));
 speed_vector=drive_cycle(1,1:N);
 acceleration_vector=drive_cycle(2,1:N);
 gearnumber_vector=drive_cycle(3,1:N);
-%standard driving cycles don't have any slope
-road_slope = zeros(1,N);
-%modify the driving cycle-> min speed 5km/h
+
 for i=1:N
     if(speed_vector(i)<=5/3.6)
         speed_vector(i)=5/3.6;
     end
 end
 
-
+%Driving cycles are defined without any slope
+%If you want to define a slope, change the vector below 
+road_slope = zeros(1,N); %rad
 %SOC constraints
 SOC_sup = 0.7;
 SOC_inf = 0.4;
 SOC_cons = 0.55;
 % create grid
 clear grd
-Path = 0.001;
+Path = 0.01;
 Nx = floor((SOC_sup-SOC_inf)/Path+1);
 grd.Nx{1}    = Nx; 
 grd.Xn{1}.hi = SOC_sup; 
@@ -41,11 +40,10 @@ grd.X0{1} = SOC_cons;
 
 % final state constraints
 grd.XN{1}.hi = SOC_cons+0.01;
-grd.XN{1}.lo = 0.5451;
+grd.XN{1}.lo = SOC_cons;
 
-% Input characterization
 Inp_max = 1;
-Inp_min = -1;
+Inp_min = -5;
 Nu = floor((Inp_max-Inp_min)/0.01+1);
 %Input 
 grd.Nu{1}    = Nu; 
@@ -76,7 +74,7 @@ if strcmp(options.BoundaryMethod,'Line')
 end
 [res, dyn] = dpm(@hev,[],grd,prb,options);
 %%
-% Plot the resulting SOC
+%PLOT SOC
 t = 0:1:N;
 SOC_extr = res.X{1};
 SOC = SOC_extr;
@@ -91,11 +89,11 @@ grid on
 ylim([SOC_inf SOC_sup])
 xlim([0 N])
 
-% Plot the control variable
+%Plot control variable
 t2 = 0:1:N-1;
 xpl = linspace(0,N,N);
 ypl = zeros(size(xpl));
-x_fill = [xpl, fliplr(xpl)];
+x_fill = [xpl, fliplr(xpl)]; % combina x con la sua versione invertita per chiudere la forma
 y_fill = -[ypl, 5*ones(size(ypl))];
 y_fill2 = [ypl, 1*ones(size(ypl))];
 figure
@@ -109,7 +107,7 @@ plot(res.u)
 xlabel("Time[s]")
 ylabel("Torque split factor")
 xlim([0 N])
-ylim([-2,2])
+ylim([-5,2])
 title("Torque Split Ratio")
 legend("Battery charge","Battery Discharge","U0")
 subplot(3,1,2)
@@ -127,7 +125,7 @@ ylabel("SOC")
 grid on
 ylim([SOC_inf SOC_sup])
 xlim([0 N])
-%%
+
 %Plot fuel consumption
 C_extr2 = res.Pe2(1,:);
 cons2 =zeros(1,N);
