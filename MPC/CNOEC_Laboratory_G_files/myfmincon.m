@@ -272,7 +272,7 @@ elseif strcmp(myoptions.Hessmethod,'BFGS')    % BFGS method
             && deltaf_rel > myoptions.tolfun...
             || max(eq_constr_max,-ineq_constr_min) > myoptions.tolconstr)
         % Compute new search direction
-        [pk,~,~,~,LagMult]  =   quadprog(Hk,gradfxk,-gradhk',hxk+myoptions.tolconstr,gradgk',-gxk,[],[],[],myoptions.QPoptions);
+        [pk,~,~,~,LagMult]  =   quadprog(Hk,gradfxk,-gradhk',hxk,gradgk',-gxk,[],[],[],myoptions.QPoptions);
      
         if isempty(LagMult)
             po = 1;
