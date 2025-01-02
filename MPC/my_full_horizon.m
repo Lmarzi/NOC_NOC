@@ -1,4 +1,4 @@
-function toreturn= my_full_horizon(u,SOC_0,StateUpdate)
+function [toreturn,SOC,mf]= my_full_horizon(u,SOC_0,StateUpdate)
     N=length(u);
     SOC=zeros(1,N+1);
     SOC(1)=SOC_0;
@@ -18,4 +18,5 @@ function toreturn= my_full_horizon(u,SOC_0,StateUpdate)
     c=[-SOC(2:end)+0.7,SOC(2:end)-0.4,I_c,V_c,[out.Tm]-[out.Tmmin],-[out.Tm]+[out.Tmmax],[out.Te],-[out.Te]+[out.Temax]];
     ceq=[];
     toreturn=[mf_eq,ceq,c]';
+    SOC=SOC(2:end);
 end

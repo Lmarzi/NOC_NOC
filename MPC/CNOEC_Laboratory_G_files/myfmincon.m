@@ -241,14 +241,8 @@ elseif strcmp(myoptions.Hessmethod,'BFGS')    % BFGS method
     gradLagr            =   gradfxk-gradgk*lambdak-gradhk*muk;
     
     % Compute worst-case equality and inequality constraints (for feedback
-    % and termination conditions)
-    if ~isempty(gxk)
-        eq_constr_max       =   max(abs(gxk));
-    end
-    if ~isempty(hxk)
-        ineq_constr_min     =   min(hxk);
-    end
-    
+    % and termination conditions
+
     % Feedback and output function
     if strcmp(myoptions.display,'Iter')
         if ineq_constr_min<=0 && sign(ineq_constr_min)==-1
@@ -266,17 +260,27 @@ elseif strcmp(myoptions.Hessmethod,'BFGS')    % BFGS method
     end
     
     % Solver iterations
-    while k < myoptions.nitermax && (norm(gradLagr) > myoptions.tolgrad...
+    while k < myoptions.nitermax && ...
+            (norm(gradLagr) > myoptions.tolgrad...
             && k < myoptions.nitermax...
             && deltaxk_rel > myoptions.tolx...
             && deltaf_rel > myoptions.tolfun...
             || max(eq_constr_max,-ineq_constr_min) > myoptions.tolconstr)
+        
+        if isnan(Hk)
+            po=1;
+        end
+        if ~issymmetric(Hk)
+            po=1;
+        end
+
         % Compute new search direction
         [pk,~,~,~,LagMult]  =   quadprog(Hk,gradfxk,-gradhk',hxk,gradgk',-gxk,[],[],[],myoptions.QPoptions);
      
         if isempty(LagMult)
             po = 1;
         end
+
         lambda_tilde        =   -LagMult.eqlin;
         mu_tilde            =   LagMult.ineqlin;
         delta_lambda        =   lambda_tilde-lambdak;
@@ -332,14 +336,15 @@ elseif strcmp(myoptions.Hessmethod,'BFGS')    % BFGS method
         % Update Hessian estimate with BFGS rule
         y                       =   gradLagrkp1-gradLagrk_kp1;
         s                       =   xkp1-xk;
-        if max(abs(s))>0
+        if max(abs(s))>1e-12 && max(abs(y))>1e-12
             if y'*s<= myoptions.BFGS_gamma*(s'*Hk*s)
                 y   =   y+(myoptions.BFGS_gamma*s'*Hk*s-s'*y)/(s'*Hk*s-s'*y)*(Hk*s-y);
             end
             Hk                      =   Hk-(Hk*(s*s')*Hk)/(s'*Hk*s)+(y*y')/(s'*y);
             Hk                      =   0.5*(Hk+Hk');
         end
-        
+
+
         % Update variables
         k                       =   k+1;
         xk                      =   xkp1;

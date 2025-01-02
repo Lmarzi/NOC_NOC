@@ -8,13 +8,12 @@ load ARTEMIS_road.mat
 load WLTC.mat
 
 %Choose the driving cycle 
-drive_cycle =ARTEMIS;
+drive_cycle =[tot_speed;tot_acceleration;tot_gear;tot_dislivello];%ARTEMIS;
 
 N=length(drive_cycle(1,:));
 speed_vector=drive_cycle(1,1:N);
 acceleration_vector=drive_cycle(2,1:N);
 gearnumber_vector=drive_cycle(3,1:N);
-
 for i=1:N
     if(speed_vector(i)<=5/3.6)
         speed_vector(i)=5/3.6;
@@ -30,7 +29,7 @@ SOC_inf = 0.4;
 SOC_cons = 0.52;
 % create grid
 clear grd
-Path = 0.01;
+Path = 0.001;
 Nx = floor((SOC_sup-SOC_inf)/Path+1);
 grd.Nx{1}    = Nx; 
 grd.Xn{1}.hi = SOC_sup; 
@@ -39,8 +38,8 @@ grd.Xn{1}.lo = SOC_inf;
 grd.X0{1} = SOC_cons;
 
 % final state constraints
-grd.XN{1}.hi = 0.596;%SOC_cons+0.01;
-grd.XN{1}.lo = 0.595;%SOC_cons;
+grd.XN{1}.hi = 0.6;%SOC_cons+0.01;
+grd.XN{1}.lo = 0.599;%SOC_cons;
 
 Inp_max = 1;
 Inp_min = -5;
@@ -75,13 +74,13 @@ end
 [res, dyn] = dpm(@hev,[],grd,prb,options);
 %%
 %PLOT SOC
-t = 0:1:length(drive_cycle(1,:));;
+t = 0:1:length(drive_cycle(1,:));
 SOC_extr = res.X{1};
 SOC = SOC_extr;
 figure
 plot(t,SOC)
 hold on
-plot(t,SOC_cons*ones(N+1),"--k")
+plot(t,SOC_cons*ones(N+1,1),"--k")
 title("SOC")
 xlabel("Time[s]")
 ylabel("SOC [%]")
