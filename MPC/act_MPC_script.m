@@ -84,7 +84,7 @@ for k=1:N_rounds
         x(k)=rand;
         y(k)=rand;
         [driving_cycle,name]=pick_cycle(x(k),y(k),0.25);
-        fprintf("The driving cycle %s has been picked, with a slope of %f degrees \n",name,min(driving_cycle(4,:))/pi*180)
+        fprintf("The driving cycle %s has been picked, with a slope of %f %% \n",name,tan(min(driving_cycle(4,:)))*100)
     end
     
     %Start the MPC algorithm on the specific cycle
@@ -125,7 +125,7 @@ for k=1:N_rounds
         if rem(j,ceil(N_it/10))==0
             eltime = eltime+toc;
             int = ceil(N_it/10);
-            fprintf("We are at: %d %% of round %d \n To compute this 10 percent in total it took: %f s \n On average it takes: %f s per iteration \n",round(j/(N_it)*100),k,toc,eltime/int)
+            fprintf("We are at: %d %% of round %d \n To compute this 10 %% in total it took: %f s \n On average it takes: %f s per iteration \n",round(j/(N_it)*100),k,toc,eltime/int)
             eltime = 0;
             tic
         end
