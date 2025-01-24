@@ -161,7 +161,7 @@ load eff_interpol.mat
 
 
 %Prints if the first attempt ever failed to converge and had to retry with
-%u=0, it can fail if u was reloaded
+%u=0, it can fail if u,x,y were reloaded
 try
     fprintf("The first attempt failed %d times, it also failed with u=0 %d times\n",sum(exitf<=0),failed)
 catch
