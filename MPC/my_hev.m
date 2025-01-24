@@ -23,7 +23,7 @@ inp.U{1}=u;
 % Wheel speed (rad/s)
 wv  = inp.W{1} ./ wheel_radius;
 
-Tv = (vehicle_mass*g*sin(inp.W{4})+a_cd*cos(inp.W{4})*(inp.W{1}>0)+b_cd.*inp.W{1}*cos(inp.W{4}) + c_cd.*inp.W{1}.^2 + vehicle_mass.*inp.W{2}) .* wheel_radius;
+Tv = (vehicle_mass*g*sin(inp.W{4})+a_cd*cos(inp.W{4})+b_cd.*inp.W{1}*cos(inp.W{4}) + c_cd.*inp.W{1}.^2 + vehicle_mass.*inp.W{2}).*(inp.W{1}>0) .* wheel_radius;
 
 % TRANSMISSION
 gearbox_efficiency = 0.96;

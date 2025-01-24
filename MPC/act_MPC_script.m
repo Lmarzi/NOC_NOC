@@ -192,22 +192,26 @@ ylabel('u')
 %Plots SOC overtime
 figure
 plot(SOC2plot, 'k', 'LineWidth', 1);
-
 %compares with dp
 hold on
+%Computes dp result
 res=dp_comp(driving_cycle,SOC_START,SOC2plot(end));
 fprintf("Compared to dp, it consumes %f times as much\n",tot_mf/(sum(res.C{:}*1000))) 
+%%
+%Computes SOC with dp and plots it
 [~,SOC_dp]=FullStateUpdate(res.u);
-plot(SOC_dp+0.02)
+plot(SOC_dp)
 legend('SOC with MPC','SOC dp')
 hold off
 ylabel("SOC [ % ]")
 xlabel("time [s]")
-%%
+
+%Computes and plot total consumption overtime in the two cases
 for i=1:length(tot_speed)-2
     tot_cons_MPC(i)=sum(mf(1:i));
     tot_cons_dp(i)=sum(res.C{1}(1:i+2));
 end
+figure
 plot(tot_cons_MPC)
 hold on
 plot(tot_cons_dp)
