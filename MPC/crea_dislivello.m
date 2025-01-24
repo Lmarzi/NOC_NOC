@@ -4,7 +4,7 @@ function dislivello = crea_dislivello(len,x)
     len_discesa=len;
     i=start;
     while (i<len_discesa+start && i<len)
-        dislivello(i)=-x*10*pi/180;
+        dislivello(i)=-x*5.71*pi/180;
         i=i+1;
     end
 end

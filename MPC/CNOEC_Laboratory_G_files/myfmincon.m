@@ -267,6 +267,9 @@ elseif strcmp(myoptions.Hessmethod,'BFGS')    % BFGS method
             && deltaf_rel > myoptions.tolfun...
             || max(eq_constr_max,-ineq_constr_min) > myoptions.tolconstr)
         
+        if isnan(sum(sum(Hk)))
+            Hk= 1e-4*eye(n);
+        end
         if isnan(Hk)
             po=1;
         end

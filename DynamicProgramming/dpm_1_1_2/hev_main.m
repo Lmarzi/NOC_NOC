@@ -26,7 +26,7 @@ road_slope = drive_cycle(4,1:N);%zeros(1,N); %rad
 %SOC constraints
 SOC_sup = 0.7;
 SOC_inf = 0.4;
-SOC_cons = 0.52;
+SOC_cons = 0.55;
 % create grid
 clear grd
 Path = 0.001;
@@ -38,8 +38,8 @@ grd.Xn{1}.lo = SOC_inf;
 grd.X0{1} = SOC_cons;
 
 % final state constraints
-grd.XN{1}.hi = 0.6;%SOC_cons+0.01;
-grd.XN{1}.lo = 0.599;%SOC_cons;
+grd.XN{1}.hi = SOC2plot(end);%SOC_cons+0.01;
+grd.XN{1}.lo = SOC2plot(end)-0.01;%SOC_cons;
 
 Inp_max = 1;
 Inp_min = -5;

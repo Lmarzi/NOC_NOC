@@ -1,6 +1,6 @@
 close all
 clc
-clear all
+%clear all
 
 %load all the driving cycle data and the efficiency grids
 load ARTEMIS.mat;
@@ -8,21 +8,20 @@ load ARTEMIS_road.mat
 load WLTC.mat
 load eff_interpol.mat
 load Results\LONG_FINAL.mat
-load eff_interpol.mat
-
 %Define the SOC the car starts at
-SOC_START=0.52;
+SOC_START=0.4;
 
 %Decide the driving cycle, set to [] to pick a random one out of
 %the three with a random downhill pattern each loop, to test for more
-%complicated patterns
-driving_cycle=ARTEMIS_road;
+%complicated patterns. Otherwise set to ARTEMIS, ARTEMIS_road, or WLTC for
+%standardised driving cycles.
+driving_cycle_init=[];
 
 %Define how many cycles in a row to solve
-N_rounds=1;
+N_rounds=27;
 
 %Define which instant of the loop to start in 
-start=1;
+start=0;
 
 %Define the time horizon
 N=1; 
@@ -61,32 +60,33 @@ SOC_tot=[];
 israndom=false;
 
 %If it's empty set a flag value for later in the loop ro randomise it
-if isempty(driving_cycle)
+if isempty(driving_cycle_init)
     israndom=true;
 
 %If it's not standardise the driving cycle, specifying a zero downhill slope
 else
+    driving_cycle=driving_cycle_init;
     driving_cycle(4,1:length(driving_cycle))=zeros(1,length(driving_cycle));
 end
 
 tic
 eltime = 0;
 failed=0;
-
+pos_exitf=1;
 %Starts the loop across the driving cycles, if N_rounds>=1
 for k=1:N_rounds
     %To create the path it uses two numbers picked at random, that then get saved to allow 
     %for future simulations on the same exact path. To recreate it use recreate_path(x,y,N,0.25).
     % x picks the path, y picks the downhill pattern that will only be present 25% of the time
     if israndom
-        x(k)=rand;
-        y(k)=rand;
+        %x(k)=rand;
+        %y(k)=rand;
         [driving_cycle,name]=pick_cycle(x(k),y(k),0.25);
-        fprintf("È stato scelto il ciclo %s, il SOC è %f\n",name, SOC(end))
+        fprintf("The driving cycle %s has been picked, with a slope of %f degrees \n",name,min(driving_cycle(4,:))/pi*180)
     end
     
     %Start the MPC algorithm on the specific cycle
-    N_it=length(driving_cycle)- start;
+    N_it=length(driving_cycle)- start- 1;
     for j=1:N_it-N
         
         %Extracts the vectors from the driving cycle matrix
@@ -106,23 +106,24 @@ for k=1:N_rounds
         % In case of abrupt changes it can fail in the first attempt, 
         %in that case it tries with u=0 in the last time step and later raises a warning.
         %This problem disappears with a low enough N.
-        [u_n,~,~,exitf(j),~,~]=myfmincon(FullStateUpdate,[u_n(2:end);u_n(end)],[],[],C,d,0*N,8*N,myoptions);
-        if exitf(j)<=0
-            fprintf("failed")
-            [u_n,~,~,exitf_i,~,~]=myfmincon(FullStateUpdate,[u_n(1:end-1);0],[],[],C,d,0*N,8*N,myoptions);
-            if exitf_i<=0
+        [u_n,~,~,exitf(pos_exitf),~,~]=myfmincon(FullStateUpdate,[u_n(2:end);u_n(end)],[],[],C,d,0*N,8*N,myoptions);
+        if exitf(pos_exitf)<=0
+            fprintf("failed at iteration %d of cycle %d with exitflag %d\n",j,k,exitf(pos_exitf))
+            [u_n,~,~,exitf_f,~,~]=myfmincon(FullStateUpdate,[u_n(1:end-1);0],[],[],C,d,0*N,8*N,myoptions);
+            if exitf_f<=0
                 failed=failed+1;
             end
-        end
-        
+        end        
+        pos_exitf=pos_exitf+1;
+
         %Saves the u to simulate the results later
         u=[u,u_n(1)];
         
-        %Every 10% prints a loading message
+        %Every 10% it prints a loading message
         if rem(j,ceil(N_it/10))==0
             eltime = eltime+toc;
             int = ceil(N_it/10);
-            fprintf("We are at: %d %% of the round %d \n In total it takes: %f s \n On average it takes: %f s ad iterazione \n",round(j/(N_it)*100),k,toc,eltime/int)
+            fprintf("We are at: %d %% of round %d \n In total it takes: %f s \n On average it takes: %f s ad iterazione \n",round(j/(N_it)*100),k,toc,eltime/int)
             eltime = 0;
             tic
         end
@@ -134,28 +135,47 @@ end
 toc
 
 %%
-%Simulate the input found, to compute overall performances
-if israndom
-    driving_cycle=recreate_path(x,y,N,start,0.25);
-end
+%Simulate the input found, to compute overall performances. If the u has
+%already been computed this part can be ran on its own, defining the
+%driving cycle like before
 
-%Prints if the first attempt ever failed to converge and had to retry with
-%u=0
-fprintf("Il primo tentativo ha fallito %d volte, non è stato risolto %d volte",sum(exitf<=0),failed)
-
-
-%Extracts the total vectors
-tot_speed=driving_cycle(1,start:end);
-tot_acceleration=driving_cycle(2,start:end);
-tot_gear=driving_cycle(3,start:end);
-tot_dislivello=driving_cycle(4,start:end);
+%load all the driving cycle data and the efficiency grids
+load ARTEMIS.mat;
+load ARTEMIS_road.mat
+load WLTC.mat
+load eff_interpol.mat
+% driving_cycle=[];
+% 
+% if isempty(driving_cycle_init)
+%     driving_cycle=recreate_path(x,y,N,start,0.25);
+% else
+%     for i=1:N_rounds
+%         driving_cycle=[driving_cycle,driving_cycle_init(:,start+1:end-N)];
+%     end
+%     driving_cycle(4,:)=zeros(1,length(driving_cycle));
+% end
+% 
+% 
+% %Prints if the first attempt ever failed to converge and had to retry with
+% %u=0, it can fail if u was reloaded
+% try
+%     fprintf("The first attempt failed %d times, it also failed with u=0 %d times\n",sum(exitf<=0),failed)
+% catch
+%     fprintf("Record of optimisation failure was not found")
+% end
+% 
+% %Extracts the total vectors
+% tot_speed=driving_cycle(1,:);
+% tot_acceleration=driving_cycle(2,:);
+% tot_gear=driving_cycle(3,:);
+% tot_dislivello=driving_cycle(4,:);
 
 %Redefines the handles with the full vector
 StateUpdate=@(input,cur_SOC,i)my_hev(tot_speed(i),tot_acceleration(i),tot_gear(i),tot_dislivello(i),cur_SOC,input,etam_int,etaeng_int,Tmmax_int,Tmmin_int,Temax_int);
 FullStateUpdate=@(u)my_full_horizon(u,SOC_START,StateUpdate);
 
-%Simulates along the entire horizon
-[cost_const,SOC2plot,mf]=FullStateUpdate(u);
+%Simulates along the entire cycle
+[~,SOC2plot,mf]=FullStateUpdate(u);
 
 %Writes total consumption on console, along with the total variation in SOC
 tot_mf=sum(mf)*1000
@@ -166,7 +186,26 @@ figure
 stairs(u)
 ylabel('u')
 
+%% 
 %Plots SOC overtime
 figure
 plot(SOC2plot, 'k', 'LineWidth', 1);
-ylabel('SOC')
+hold on
+%res=dp_comp(driving_cycle,SOC_START,SOC2plot(end));
+fprintf("Compared to dp, it consumes %f times as much\n",tot_mf/(sum(res.C{:}*1000))) 
+[~,SOC_dp]=FullStateUpdate(res.u);
+plot(SOC_dp)
+legend('SOC with MPC','SOC dp')
+hold off
+%%
+for i=1:length(tot_speed)
+    tot_cons_MPC(i)=sum(mf(1:i));
+    tot_cons_dp(i)=sum(res.C{1}(1:i));
+end
+plot(tot_cons_MPC)
+hold on
+plot(tot_cons_dp)
+hold off
+legend('consumption with MPC','consumption with dp')
+ylabel("mf [kg]")
+xlabel("time [s]")
