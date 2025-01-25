@@ -15,7 +15,7 @@ SOC_START=0.52;
 %the three with a random downhill pattern each loop, to test for more
 %complicated patterns. Otherwise set to ARTEMIS, ARTEMIS_road, or WLTC for
 %standardised driving cycles.
-driving_cycle_init=[];
+driving_cycle_init=ARTEMIS;
 
 %Define how many cycles in a row to solve
 N_rounds=1;
@@ -148,16 +148,16 @@ load WLTC.mat
 load eff_interpol.mat
 
 %Uncomment this if only x,y were saved
-% driving_cycle=[];
-% 
-% if isempty(driving_cycle_init)
-%     driving_cycle=recreate_path(x,y,N,start,0.25);
-% else
-%     for i=1:N_rounds
-%         driving_cycle=[driving_cycle,driving_cycle_init(:,start+1:end-N)];
-%     end
-%     driving_cycle(4,:)=zeros(1,length(driving_cycle));
-% end
+driving_cycle=[];
+
+if isempty(driving_cycle_init)
+    driving_cycle=recreate_path(x,y,N,start,0.25);
+else
+    for i=1:N_rounds
+        driving_cycle=[driving_cycle,driving_cycle_init(:,start+1:end-N)];
+    end
+    driving_cycle(4,:)=zeros(1,length(driving_cycle));
+end
 
 
 %Prints if the first attempt ever failed to converge and had to retry with
@@ -208,7 +208,7 @@ ylabel("SOC [ % ]")
 xlabel("time [s]")
 
 %Computes and plot total consumption overtime in the two cases
-for i=1:length(tot_speed)-2-N
+for i=1:length(tot_speed)-2-N*N_rounds
     tot_cons_MPC(i)=sum(mf(1:i));
     tot_cons_dp(i)=sum(res.C{1}(1:i+2));
 end
