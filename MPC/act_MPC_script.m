@@ -179,10 +179,11 @@ StateUpdate=@(input,cur_SOC,i)my_hev(tot_speed(i),tot_acceleration(i),tot_gear(i
 FullStateUpdate=@(u)my_full_horizon(u,SOC_START,StateUpdate);
 
 %Simulates along the entire cycle
-[~,SOC2plot,mf]=FullStateUpdate(u);
+[vect,SOC2plot,mf]=FullStateUpdate(u);
 
 %Writes total consumption on console, along with the total variation in SOC
 tot_mf=sum(mf)*1000
+tot_MPC = sum(vect(1,:))*1000
 tot_soc_var=SOC_START-SOC2plot(end)
 
 %Plots u
@@ -207,7 +208,7 @@ ylabel("SOC [ % ]")
 xlabel("time [s]")
 
 %Computes and plot total consumption overtime in the two cases
-for i=1:length(tot_speed)-2
+for i=1:length(tot_speed)-2-N
     tot_cons_MPC(i)=sum(mf(1:i));
     tot_cons_dp(i)=sum(res.C{1}(1:i+2));
 end
