@@ -9,13 +9,13 @@ load WLTC.mat
 load eff_interpol.mat
 
 %Define the SOC the car starts at
-SOC_START=0.52;
+SOC_START=0.55;
 
 %Decide the driving cycle, set to [] to pick a random one out of
 %the three with a random downhill pattern each loop, to test for more
 %complicated patterns. Otherwise set to ARTEMIS, ARTEMIS_road, or WLTC for
 %standardised driving cycles.
-driving_cycle_init=ARTEMIS;
+driving_cycle_init=WLTC;
 
 %Define how many cycles in a row to solve
 N_rounds=1;
@@ -24,7 +24,7 @@ N_rounds=1;
 start=0;
 
 %Define the time horizon
-N=1; 
+N=3; 
 
 %Initialise the first window of SOC
 SOC=SOC_START*ones(N,1);
