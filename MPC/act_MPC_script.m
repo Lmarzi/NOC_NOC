@@ -15,7 +15,7 @@ SOC_START=0.55;
 %the three with a random downhill pattern each loop, to test for more
 %complicated patterns. Otherwise set to ARTEMIS, ARTEMIS_road, or WLTC for
 %standardised driving cycles.
-driving_cycle_init=WLTC;
+driving_cycle_init=ARTEMIS;
 
 %Define how many cycles in a row to solve
 N_rounds=1;
@@ -125,7 +125,7 @@ for k=1:N_rounds
         if rem(j,ceil(N_it/10))==0
             eltime = eltime+toc;
             int = ceil(N_it/10);
-            fprintf("We are at: %d %% of round %d \n To compute this 10 %% in total it took: %f s \n On average it takes: %f s per iteration \n",round(j/(N_it)*100),k,toc,eltime/int)
+            fprintf("We are at: %d %% of round %d \n To compute this section in total it took: %f s \n On average it takes: %f s per iteration \n",round(j/(N_it)*100),k,toc,eltime/int)
             eltime = 0;
             tic
         end
@@ -133,21 +133,22 @@ for k=1:N_rounds
         %Updates SOC for next optimisation window
         [~,SOC]=FullStateUpdate(u_n);      
     end
+    eltime = eltime+toc;
+    fprintf("We are at: %d %% of round %d \n To compute this section in total it took: %f s \n On average it takes: %f s per iteration \n",100,k,toc,eltime/int)
+    
 end
-toc
 
 %%
-%Simulate the input found, to compute overall performances. If the u has
-%already been computed this part can be ran on its own, defining the
-%driving cycle like before
+%Simulate the input found, to compute overall performances.
 
-%load all the driving cycle data and the efficiency grids
+%reload all the driving cycle data and the efficiency grids, sometimes it's
+%useful to run this section on its own
 load ARTEMIS.mat;
 load ARTEMIS_road.mat
 load WLTC.mat
 load eff_interpol.mat
 
-%Uncomment this if only x,y were saved
+%Standardise the driving cycle for the total input, useful if N_rounds>1
 driving_cycle=[];
 
 if isempty(driving_cycle_init)
