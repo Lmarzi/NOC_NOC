@@ -15,16 +15,16 @@ SOC_START=0.55;
 %the three with a random downhill pattern each loop, to test for more
 %complicated patterns. Otherwise set to ARTEMIS, ARTEMIS_road, or WLTC for
 %standardised driving cycles.
-driving_cycle_init=ARTEMIS;
+driving_cycle_init=[];
 
 %Define how many cycles in a row to solve
-N_rounds=1;
+N_rounds=5;
 
 %Define which instant of the loop to start in 
 start=0;
 
 %Define the time horizon
-N=3; 
+N=1; 
 
 %Initialise the first window of SOC
 SOC=SOC_START*ones(N,1);
@@ -73,7 +73,7 @@ tic
 eltime = 0;
 failed=0;
 pos_exitf=1;
-
+pos_t=1;
 %Starts the loop across the driving cycles, if N_rounds>=1
 for k=1:N_rounds
     %To create the path it uses two numbers picked at random, that then get saved to allow 
@@ -88,7 +88,7 @@ for k=1:N_rounds
     end
     
     %Start the MPC algorithm on the specific cycle
-    N_it=length(driving_cycle)- start- 1;
+    N_it=length(driving_cycle)- start;
     for j=1:N_it-N
         
         %Extracts the vectors from the driving cycle matrix
@@ -99,9 +99,10 @@ for k=1:N_rounds
 
         %Defines the handles to pass to myfmincon, myFullStateUpdate simulates 
         %along the entire horizon, StateUpdate simulates one step
-        StateUpdate=@(input,cur_SOC,i)my_hev(speed(i),acceleration(i),gear(i),dislivello(i),cur_SOC,input,etam_int,etaeng_int,Tmmax_int,Tmmin_int,Temax_int);
+        t(pos_t)=N_it*N_rounds-j-(k-1)*N_it;
+        StateUpdate=@(input,cur_SOC,i)my_hev(speed(i),acceleration(i),gear(i),dislivello(i),cur_SOC,input,etam_int,etaeng_int,Tmmax_int,Tmmin_int,Temax_int,t(pos_t));
         FullStateUpdate=@(u)my_full_horizon(u,SOC(1),StateUpdate);
-        
+        pos_t=pos_t+1;
         %Computes the optimal N seconds window. This is donegiving as an initial
         % guess what was computed the loop prior, this way the action will
         % be smoother and the optimisation will be quicker.
@@ -176,7 +177,7 @@ tot_gear=driving_cycle(3,:);
 tot_dislivello=driving_cycle(4,:);
 
 %Redefines the handles with the full vector
-StateUpdate=@(input,cur_SOC,i)my_hev(tot_speed(i),tot_acceleration(i),tot_gear(i),tot_dislivello(i),cur_SOC,input,etam_int,etaeng_int,Tmmax_int,Tmmin_int,Temax_int);
+StateUpdate=@(input,cur_SOC,i)my_hev(tot_speed(i),tot_acceleration(i),tot_gear(i),tot_dislivello(i),cur_SOC,input,etam_int,etaeng_int,Tmmax_int,Tmmin_int,Temax_int,t(i));
 FullStateUpdate=@(u)my_full_horizon(u,SOC_START,StateUpdate);
 
 %Simulates along the entire cycle
@@ -199,7 +200,7 @@ hold on
 %Computes dp result
 res=dp_comp(driving_cycle,SOC_START,SOC2plot(end));
 fprintf("Compared to dp, it consumes %f times as much\n",tot_mf/(sum(res.C{:}*1000))) 
-%%
+
 %Computes SOC with dp and plots it
 [~,SOC_dp]=FullStateUpdate(res.u);
 plot(SOC_dp)

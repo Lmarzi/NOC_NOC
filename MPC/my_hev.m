@@ -1,4 +1,4 @@
-function [mf,SOC_new,seq,Treq,Tgiv,mb,I_c,V_c,out] = my_hev(speed,acceleration,gear,dislivello,cur_SOC,u,F1,F2,Tmmax_int,Tmmin_int,Temax_int)
+function [mf,SOC_new,seq,Treq,Tgiv,mb,I_c,V_c,out] = my_hev(speed,acceleration,gear,dislivello,cur_SOC,u,F1,F2,Tmmax_int,Tmmin_int,Temax_int,t)
 
 % VEHICLE PARAMETERS
 wheel_radius = 0.281154; %m
@@ -109,7 +109,7 @@ V_c=(Vn.^2 - 4.*r.*Pm)./Vn^2;
 Pb =   Ib .* Vn;
 Pb   = (conj(Pb)+Pb)/2;
 mb=Pb./gasoline_lower_heating_value;
-seq = ((Tm>0).*1/(0.2757*0.8879)+(Tm<0).*0.8879/0.2757).*25.*(-(2.*(SOC_new-0.55)).^3+(2*(0.68-0.55)).^3);
+seq = ((Tm>0).*1/(0.2757*0.8879)+(Tm<0).*0.8879/0.2757).*25.*(-(2.*(SOC_new-0.55)).^3+(2*(0.68-0.55)).^3)+(t<1000)*1000*(0.55-SOC_new)*exp(-t/150);
 out.Tmmax = Tm_max;
 out.Tmmin = Tm_min;
 out.Temax = Te_max;

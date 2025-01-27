@@ -6,6 +6,6 @@ driving_cycle=[];
 %created the first time
 for k=1:min(length(x),length(y))
     driving_cycle_t=pick_cycle(x(k),y(k),slope_perc); 
-    driving_cycle=[driving_cycle,driving_cycle_t(:,start+1:end-N-1)];
+    driving_cycle=[driving_cycle,driving_cycle_t(:,start+1:end-N)];
 end
 end

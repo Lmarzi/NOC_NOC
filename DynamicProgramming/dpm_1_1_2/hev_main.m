@@ -8,7 +8,7 @@ load ARTEMIS_road.mat
 load WLTC.mat
 
 %Choose the driving cycle 
-drive_cycle =[tot_speed;tot_acceleration;tot_gear;tot_dislivello];%ARTEMIS;
+drive_cycle =ARTEMIS;
 
 N=length(drive_cycle(1,:));
 speed_vector=drive_cycle(1,1:N);

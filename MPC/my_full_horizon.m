@@ -23,7 +23,7 @@ function [toreturn,SOC,mf]= my_full_horizon(u,SOC_0,StateUpdate)
     end
 
     %Return the cost function and the constraints
-    mf_eq=sum(mf+mb.*seq.*1.5);
+    mf_eq=sum(mf+mb.*seq);
     c=[-SOC(2:end)+0.7,SOC(2:end)-0.4,I_c,V_c,[out.Tm]-[out.Tmmin],-[out.Tm]+[out.Tmmax],[out.Te],-[out.Te]+[out.Temax]];
     ceq=[];
     toreturn=[mf_eq,ceq,c]';
