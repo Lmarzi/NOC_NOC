@@ -7,6 +7,7 @@ load ARTEMIS.mat;
 load ARTEMIS_road.mat
 load WLTC.mat
 load eff_interpol.mat
+load Results\LONG_FINAL.mat
 
 %Define the SOC the car starts at
 SOC_START=0.55;
@@ -15,7 +16,7 @@ SOC_START=0.55;
 %the three with a random downhill pattern each loop, to test for more
 %complicated patterns. Otherwise set to ARTEMIS, ARTEMIS_road, or WLTC for
 %standardised driving cycles.
-driving_cycle_init=[];
+driving_cycle_init=WLTC;%[tot_speed;tot_acceleration;tot_gear;tot_dislivello];
 
 %Define how many cycles in a row to solve
 N_rounds=5;
@@ -66,7 +67,9 @@ if isempty(driving_cycle_init)
 %If it's not standardise the driving cycle, specifying a zero downhill slope
 else
     driving_cycle=driving_cycle_init;
-    driving_cycle(4,1:length(driving_cycle))=zeros(1,length(driving_cycle));
+    if length(driving_cycle(:,1))<4
+        driving_cycle(4,1:length(driving_cycle))=zeros(1,length(driving_cycle));
+    end
 end
 
 tic
@@ -86,7 +89,6 @@ for k=1:N_rounds
         [driving_cycle,name]=pick_cycle(x(k),y(k),0.25);
         fprintf("The driving cycle %s has been picked, with a slope of %f %% \n",name,tan(min(driving_cycle(4,:)))*100)
     end
-    
     %Start the MPC algorithm on the specific cycle
     N_it=length(driving_cycle)- start;
     for j=1:N_it-N
@@ -110,10 +112,10 @@ for k=1:N_rounds
         %in that case it tries with u=0 in the last time step and later raises a warning.
         %This problem disappears with a low enough N.
         [u_n,~,~,exitf(pos_exitf),~,~]=myfmincon(FullStateUpdate,[u_n(2:end);u_n(end)],[],[],C,d,0*N,8*N,myoptions);
-        if exitf(pos_exitf)<=0
+        if exitf(pos_exitf)==-2
             fprintf("failed at iteration %d of cycle %d with exitflag %d\n",j,k,exitf(pos_exitf))
             [u_n,~,~,exitf_f,~,~]=myfmincon(FullStateUpdate,[u_n(1:end-1);0],[],[],C,d,0*N,8*N,myoptions);
-            if exitf_f<=0
+            if exitf_f==-2
                 failed=failed+1;
             end
         end        
@@ -202,7 +204,7 @@ res=dp_comp(driving_cycle,SOC_START,SOC2plot(end));
 fprintf("Compared to dp, it consumes %f times as much\n",tot_mf/(sum(res.C{:}*1000))) 
 
 %Computes SOC with dp and plots it
-[~,SOC_dp]=FullStateUpdate(res.u);
+[~,SOC_dp]=FullStateUpdate(res.u(1:end-N));
 plot(SOC_dp)
 legend('SOC with MPC','SOC dp')
 hold off
