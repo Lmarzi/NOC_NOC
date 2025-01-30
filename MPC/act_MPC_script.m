@@ -33,13 +33,13 @@ SOC=SOC_START*ones(N,1);
 %Initialise the input of the first window
 u_n=1*ones(N,1);
 
-%Define the linear constraints for myfmincon,
+%Define the linear constraints for myfmincon
 C=[eye(N);-eye(N)];                     
 d=[-ones(N,1);-ones(N,1)];          % -1 <= u <= 1
 
-%Decide if you want the "global constraint" for MPC or not. 
+%Decide if you want the "global constraint" for MPC. 
 %Set to 1 if wanted
-globconstr = 0;
+globconstr = 1;
 
 
 %Define the solver options
@@ -205,7 +205,7 @@ plot(SOC2plot, 'k', 'LineWidth', 1);
 %compares with dp
 hold on
 %Computes dp result
-%res=dp_comp(driving_cycle,SOC_START,SOC2plot(end));
+res=dp_comp(driving_cycle,SOC_START,SOC2plot(end));
 fprintf("Compared to dp, it consumes %f times as much\n",tot_mf/(sum(res.C{:}*1000))) 
 
 %Computes SOC with dp and plots it
