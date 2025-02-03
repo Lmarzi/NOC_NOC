@@ -33,7 +33,7 @@ SOC=SOC_START*ones(N,1);
 %Initialise the input of the first window
 u_n=1*ones(N,1);
 
-%Define the linear constraints for myfmincon
+%Define the linear inequality constraints for myfmincon
 C=[eye(N);-eye(N)];                     
 d=[-ones(N,1);-ones(N,1)];          % -1 <= u <= 1
 
