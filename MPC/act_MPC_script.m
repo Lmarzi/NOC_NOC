@@ -217,9 +217,9 @@ ylabel("SOC [ % ]")
 xlabel("time [s]")
 
 %Computes and plot total consumption overtime in the two cases
-for i=1:length(tot_speed)-2-N*N_rounds
+for i=1:length(tot_speed)-N*N_rounds
     tot_cons_MPC(i)=sum(mf(1:i));
-    tot_cons_dp(i)=sum(res.C{1}(1:i+2));
+    tot_cons_dp(i)=sum(res.C{1}(1:i));
 end
 figure
 plot(tot_cons_MPC)
