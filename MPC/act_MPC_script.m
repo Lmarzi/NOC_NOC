@@ -116,10 +116,10 @@ for k=1:N_rounds
         % In case of abrupt changes it can fail in the first attempt, 
         %in that case it tries with u=0 in the last time step and later raises a warning.
         %This problem disappears with a low enough N.
-        [u_n,~,~,exitf(pos_exitf),~,~]=myfmincon(FullStateUpdate,[u_n(2:end);u_n(end)],[],[],C,d,0*N,8*N,myoptions);
+        [u_n,~,~,exitf(pos_exitf)]=myfmincon(FullStateUpdate,[u_n(2:end);u_n(end)],[],[],C,d,0*N,8*N,myoptions);
         if exitf(pos_exitf)==-2
             fprintf("failed at iteration %d of cycle %d with exitflag %d\n",j,k,exitf(pos_exitf))
-            [u_n,~,~,exitf_f,~,~]=myfmincon(FullStateUpdate,[u_n(1:end-1);0],[],[],C,d,0*N,8*N,myoptions);
+            [u_n,~,~,exitf_f]=myfmincon(FullStateUpdate,[u_n(1:end-1);0],[],[],C,d,0*N,8*N,myoptions);
             if exitf_f==-2
                 failed=failed+1;
             end
